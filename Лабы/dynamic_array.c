@@ -1,39 +1,57 @@
 #include "dynamic_array.h"
-dynamic_Array* create_void_Array(int assumed_capacity, size_t values_size)
+dynamic_Array* create_void_Array(int assumed_capacity)
 {
 	if (assumed_capacity < 0)
 	{
 		perror("capacity can`t  be <0");
+		exit();
 	}
 	//if (values_size <= 0)
 	//{
 	//	perror("values_size can`t  be <=0");
 	//}
-	*dynamic_Array array = (dynamic_Array*)malloc(assumed_capacity * values_size);//ÔË‚Â‰ÂÌËÂ ÚËÔ‡ + ‚˚‰ÂÎˇÂÏ Ô‡ÏˇÚ¸
-	array->values = void;
-	array->size = sizeof(array);
-	array->cells_number = 0;
+	*dynamic_Array array = (dynamic_Array*)malloc(sizeof(dynamic_Array));//–ø—Ä–∏–≤–µ–¥–µ–Ω–∏–µ —Ç–∏–ø–∞ + –≤—ã–¥–µ–ª—è–µ–º –ø–∞–º—è—Ç—å
+	array->values = malloc(assumed_capacity * sizeof(ElementType));
+	array->size = 0;
 	array->capacity = assumed_capacity;
+	return array; // –ø—É—Å—Ç—å –≤–æ–∑–≤—Ä–∞—â–∞–µ—Ç —É–∫–∞–∑–∞—Ç–µ–ª—å –Ω–∞ –º–∞—Å—Å–∏–≤
 }
-void Add_value(dynamic_Array* array, void* value, int index)
+
+void Add_value(dynamic_Array* array, ElementType value, int index)
 {
 
 	if (index < 0)
 	{
 		perror("index can`t  be <0");
+		exit();
 	}
-	if (index > (array->cells_number)) //+1 ÌÂ Ì‡‰Ó Ú‡Í Í‡Í ËÌ‰ÂÍÒ‡ˆËˇ Ò 0 (˝ÚÓ ÒÎÛ˜‡È ÂÒÎË a, b, c, _ ,ıÓÚËÏ ‰Ó·‡‚ËÚ¸)
+	if (index > (array->size)) //+1 –Ω–µ –Ω–∞–¥–æ —Ç–∞–∫ –∫–∞–∫ –∏–Ω–¥–µ–∫—Å–∞—Ü–∏—è —Å 0 (—ç—Ç–æ —Å–ª—É—á–∞–π –µ—Å–ª–∏ a, b, c, _ ,—Ö–æ—Ç–∏–º –¥–æ–±–∞–≤–∏—Ç—å)
 	{
 		perror("list index out of range");
+		exit();
 	}
-	if (array->capacity <= (array->cells_number+1))//Ì‡‰Ó Û‚ÂÎË˜ËÚ¸ Ï‡ÒÒË‚ +1 ‰Ó·‡‚ËÎË ÌÓ‚Û˛ ˇ˜ÂÈÍÛ
+	if (array->capacity <= (array->size + 1))//–Ω–∞–¥–æ —É–≤–µ–ª–∏—á–∏—Ç—å –º–∞—Å—Å–∏–≤ +1 –¥–æ–±–∞–≤–∏–ª–∏ –Ω–æ–≤—É—é —è—á–µ–π–∫—É
 	{
-		array->values = (void**)realloc(array->values, array->capacity * sizeof(value));
 		array->capacity *= 2;
-	else
+		array->values = (ElementType*)realloc(array->values, array->capacity * sizeof(ElementType));//–æ—á–µ–≤–∏–¥–Ω–æ –º—ã –±—É–¥–µ–º –ø–µ—Ä–µ–¥–∞–≤–∞—Ç—å —É–∫–∞–∑–∞—Ç–µ–ª—å –ø–æ—ç—Ç–æ–º—É —Ä–∞–∑–º–µ—Ä –æ–¥–∏–Ω–Ω–∞–∫–æ–≤
 	}
+	if (index == array->size + 1)// –≤ –∫–æ–Ω–µ—Ü 
 	{
-
+		array->values[index] = value;
 	}
-	array->cells_number++;
+	else// –∫—É–¥–∞-—Ç–æ 
+	{
+		auto src = &array->values[index];
+		auto dst = src+sizeof(ElementType);
+		memcpy(dst, src, array->values_size * sizeof(ElementType));
+		array->values[index] = value;
+	}
+	array->size++;
+}
+void remove_value(dynamic_Array* array,int index);
+{
+	auto src = array->values + index * array->values_size;
+	auto dst = src + sizeof(ElementType);
+	memcpy(dst, src, array->values_size * sizeof(ElementType));
+	array->values[index] = value;
 }
