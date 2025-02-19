@@ -1,5 +1,5 @@
-#indef DYNAMIC_ARRAY //проверяет есть ли DYNAMIC_ARRAY.H если есть избегаем ошибки 
-#define DYNAMIC_ARRAY // определяем этот макрос
+#indef DYNAMIC_ARRAY //РїСЂРѕРІРµСЂСЏРµС‚ РµСЃС‚СЊ Р»Рё DYNAMIC_ARRAY.H РµСЃР»Рё РµСЃС‚СЊ РёР·Р±РµРіР°РµРј РѕС€РёР±РєРё 
+#define DYNAMIC_ARRAY // РѕРїСЂРµРґРµР»СЏРµРј СЌС‚РѕС‚ РјР°РєСЂРѕСЃ
 #include <stdlib.h>
 //
 //union {
@@ -8,16 +8,25 @@
 //};
 //
 //template<T>
+typedef ElementType void*;
+
 typedef struct dynamic_Array
 {
-	T* values; //ссылка на массив указателей а как проще?
-	size_t size;// размер масива 
-	int cells_number;//текуще количесво ячеек 
-	int capacity;// сколько ячеек можем поместить
+	ElementType* values; // РјР°СЃСЃРёРІ СѓРєР°Р·Р°С‚РµР»РµР№ 
+	int size;//С‚РµРєСѓС‰Рµ РєРѕР»РёС‡РµСЃРІРѕ СЏС‡РµРµРє 
+	int capacity;// СЃРєРѕР»СЊРєРѕ СЏС‡РµРµРє РјРѕР¶РµРј РїРѕРјРµСЃС‚РёС‚СЊ
 };
-dynamic_Array* create_void_Array( int assumed_capacity, size_t values_size);
-void Add_value(void* value, int index);// не забыть что если у нас в матрице массивы будут разной длинны это будет не матрица, матрица будет наследоваться от этого маассива
-// момент 2 я могу ввести столбец строк и столбец int это надо учитывать
-void remove_value(int index);
-void  remove_yourself(void);
-#endif// чтоб избежать ошибок 
+dynamic_Array* create_void_Array( int assumed_capacity);
+void Add_value(dynamic_Array* array, ElementType value, int index);
+//void cpy_array(dynamic_Array* array, int index1, int index2);
+void remove_value(dynamic_Array* array,int index);
+void map(dynamic_Array* array, int index);
+void where(dynamic_Array* array, int index);
+void concatinate(dynamic_Array* array1, dynamic_Array* array2)
+void remove_yourself(dynamic_Array* array);
+
+
+
+
+
+#endif// С‡С‚РѕР± РёР·Р±РµР¶Р°С‚СЊ РѕС€РёР±РѕРє 
