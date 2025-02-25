@@ -8,23 +8,22 @@
 //};
 //
 //template<T>
-typedef ElementType void*;
+typedef  void* ElementType;
 
-typedef struct dynamic_Array
+typedef struct Dynamic_Array
 {
 	ElementType* values; // массив указателей 
 	int size;//текуще количесво ячеек 
 	int capacity;// сколько ячеек можем поместить
 };
-dynamic_Array* create_void_Array( int assumed_capacity);
-void Add_value(dynamic_Array* array, ElementType value, int index);
-//void cpy_array(dynamic_Array* array, int index1, int index2);
-void remove_value(dynamic_Array* array,int index);
-void map(dynamic_Array* array, int index);
-void where(dynamic_Array* array, int index);
-void concatinate(dynamic_Array* array1, dynamic_Array* array2)
-void remove_yourself(dynamic_Array* array);
-
+Dynamic_Array* create_Array(int assumed_capacity);
+Dynamic_Array* add_value(Dynamic_Array* array, ElementType value, int index);
+void remove_value(Dynamic_Array* array,int index);
+Dynamic_Array* map(Dynamic_Array* array, ElementType(*)(ElementType) func);
+Dynamic_Array* where(Dynamic_Array* array, bool(*)(ElementType) predicate);
+Dynamic_Array* concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
+void remove_Array(Dynamic_Array* array);
+//void cpy_array(Dynamic_Array* array, int index1, int index2);
 
 
 
