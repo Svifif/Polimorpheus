@@ -1,4 +1,7 @@
+#indef DYNAMIC_ARRAY_realese
+#define DYNAMIC_ARRAY_realese
 #include "dynamic_array.h"
+
 Dynamic_Array* create_void_Array(int assumed_capacity)
 {
 	if (assumed_capacity < 0)
@@ -18,7 +21,7 @@ Dynamic_Array* create_void_Array(int assumed_capacity)
 	return array; // пусть возвращает указатель на массив
 }
 
-cpy_array(Dynamic_Array* array, Dynamic_Array * array2, int index1, int index2)
+void cpy_array(Dynamic_Array* array, Dynamic_Array * array2, int index1, int index2)
 {
 	if (index1 > index2)
 	{
@@ -89,27 +92,69 @@ int remove_value(Dynamic_Array* array,int index);
 	memcpy(dst, src, (array->values_size - index - 1) * sizeof(ElementType));
 	array->size--;
 }
-Dynamic_Array* map(Dynamic_Array* array, ElementType(*)(ElementType) func)
+Dynamic_Array* map(Dynamic_Array* array, ElementType(*)(ElementType) func,int index1, int index2)
 {
-	auto result = Dynamic_Array * create_void_Array(array->size);
-	result->size = array->size;
-	for (int i = 0; i < array->size; i++)
+	if (array && func)
 	{
-		result->values[i] = func(array->values[i]);
+		auto result = Dynamic_Array * create_void_Array(array->size);
+		result->size = array->size;
+		for (int i = index1; i < index2; i++)
+		{
+			result->values[i] = func(array->values[i]);
+		}
+		//void remove_Array(Dynamic_Array * array); ????
+
+		return result;
 	}
-	//void remove_Array(Dynamic_Array * array); ????
-	
-	return result;
+	else
+	{
+		perror("ivalid data format");
+	}
 }
 Dynamic_Array* where(Dynamic_Array* array, bool(*)(ElementType) predicate)
 {
-	auto result = Dynamic_Array * create_void_Array(array->size);
-	for (int i = 0; i < array->size; i++)
+	if (array && predicate )
 	{
-		if  predicate(array->values[i])
+		auto result = Dynamic_Array * create_void_Array(array->size);
+		for (int i = 0; i < array->size; i++)
 		{
-			add_value(result, array->values[i], i);
+			if  predicate(array->values[i])
+			{
+				add_value(result, array->values[i], i);
+			}
 		}
+		return result;
 	}
-	return result;
+	else
+	{
+		perror("ivalid data format");
+	}
 }
+Dynamic_Array* concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
+{
+	if (array1&& array2)
+	{
+		result = create_void_Array(array1->capacity + array2->capacity);
+		result->size = array1->size + array2->size;
+		cpy_array(array1, result, 0, array1->size - 1);
+		cpy_array(array1, result, array1->size - 1, result->size);
+		return result*;
+	}
+	else
+	{
+		perror("ivalid data format");
+	}
+}
+void remove_Array(Dynamic_Array* array)
+{
+	if (array)
+	{
+		free(array->values);
+		free(array);
+	}
+	else
+	{
+		perror("ivalid data format");
+	}
+}
+#endif
