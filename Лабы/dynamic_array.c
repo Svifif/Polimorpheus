@@ -79,6 +79,7 @@ void add_value(Dynamic_Array* array, ElementType value, int index)
 	}
 	array->size++;
 }
+
 int remove_value(Dynamic_Array* array,int index);
 {
 	if (array->size >= index || index<0) //если array size 0 он будетменьше или равен индекс
@@ -91,6 +92,7 @@ int remove_value(Dynamic_Array* array,int index);
 	memcpy(dst, src, (array->values_size - index - 1) * sizeof(ElementType));
 	array->size--;
 }
+
 Dynamic_Array* map(Dynamic_Array* array, ElementType(*)(ElementType) func,int index1, int index2)
 {
 	if (array != NULL && func != NULL)
@@ -113,22 +115,21 @@ Dynamic_Array* map(Dynamic_Array* array, ElementType(*)(ElementType) func,int in
 
 Dynamic_Array* where(Dynamic_Array* array, bool(*)(ElementType) predicate)
 {
-	if (array != NULL && predicate != NULL )
-	{
-		auto result = Dynamic_Array * create_void_Array(array->size);
-		for (int i = 0; i < array->size; i++)
-		{
-			if  predicate(array->values[i])
-			{
-				add_value(result, array->values[i], i);
-			}
-		}
-		return result;
-	}
-	else
+	if (array == NULL || predicate == NULL)
 	{
 		perror("ivalid data format");
+		return NULL;
 	}
+
+	auto result = Dynamic_Array * create_void_Array(array->size);
+	for (int i = 0; i < array->size; i++)
+	{
+		if  predicate(array->values[i])
+		{
+			add_value(result, array->values[i], i);
+		}
+	}
+	return result;
 }
 
 Dynamic_Array* concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
