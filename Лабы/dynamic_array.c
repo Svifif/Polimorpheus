@@ -14,11 +14,11 @@ Dynamic_Array* create_void_Array(int assumed_capacity)
 	//{
 	//	perror("values_size can`t  be <=0");
 	//}
-	*Dynamic_Array array = (Dynamic_Array*)malloc(sizeof(Dynamic_Array));//Ð¿Ñ€Ð¸Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ Ñ‚Ð¸Ð¿Ð° + Ð²Ñ‹Ð´ÐµÐ»ÑÐµÐ¼ Ð¿Ð°Ð¼ÑÑ‚ÑŒ
+	*Dynamic_Array array = (Dynamic_Array*)malloc(sizeof(Dynamic_Array));//ïðèâåäåíèå òèïà + âûäåëÿåì ïàìÿòü
 	array->values = malloc(assumed_capacity * sizeof(ElementType));
 	array->size = 0;
 	array->capacity = assumed_capacity;
-	return array; // Ð¿ÑƒÑÑ‚ÑŒ Ð²Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ ÑƒÐºÐ°Ð·Ð°Ñ‚ÐµÐ»ÑŒ Ð½Ð° Ð¼Ð°ÑÑÐ¸Ð²
+	return array; // ïóñòü âîçâðàùàåò óêàçàòåëü íà ìàññèâ
 }
 
 void cpy_array(Dynamic_Array* array, Dynamic_Array * array2, int index1, int index2)
@@ -29,7 +29,7 @@ void cpy_array(Dynamic_Array* array, Dynamic_Array * array2, int index1, int ind
 	}
 	else
 	{
-		if (Ñ€Ð°Ð·Ð¼ÐµÑ€ array 2 Ð²Ð»ÐµÐ·Ð°ÐµÑ‚)
+		if (ðàçìåð array 2 âëåçàåò)
 		{
 
 			auto src = &array->values[index1];
@@ -46,32 +46,31 @@ void cpy_array(Dynamic_Array* array, Dynamic_Array * array2, int index1, int ind
 
 void add_value(Dynamic_Array* array, ElementType value, int index)
 {
-
 	if (index < 0)
 	{
 		perror("index can`t  be <0");
 		exit();
 	}
-	if (index > (array->size)) //+1 Ð½Ðµ Ð½Ð°Ð´Ð¾ Ñ‚Ð°Ðº ÐºÐ°Ðº Ð¸Ð½Ð´ÐµÐºÑÐ°Ñ†Ð¸Ñ Ñ 0 (ÑÑ‚Ð¾ ÑÐ»ÑƒÑ‡Ð°Ð¹ ÐµÑÐ»Ð¸ a, b, c, _ ,Ñ…Ð¾Ñ‚Ð¸Ð¼ Ð´Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ)
+	if (index > (array->size)) //+1 íå íàäî òàê êàê èíäåêñàöèÿ ñ 0 (ýòî ñëó÷àé åñëè a, b, c, _ ,õîòèì äîáàâèòü)
 	{
 		perror("list index out of range");
 		exit();
 	}
-	if (array->capacity <= (array->size + 1))//Ð½Ð°Ð´Ð¾ ÑƒÐ²ÐµÐ»Ð¸Ñ‡Ð¸Ñ‚ÑŒ Ð¼Ð°ÑÑÐ¸Ð² +1 Ð´Ð¾Ð±Ð°Ð²Ð¸Ð»Ð¸ Ð½Ð¾Ð²ÑƒÑŽ ÑÑ‡ÐµÐ¹ÐºÑƒ
+	if (array->capacity <= (array->size + 1))//íàäî óâåëè÷èòü ìàññèâ +1 äîáàâèëè íîâóþ ÿ÷åéêó
 	{
 		array->capacity *= 2;
-		//array->values = (ElementType*)realloc(array->values, array->capacity * sizeof(ElementType));//Ð¾Ñ‡ÐµÐ²Ð¸Ð´Ð½Ð¾ Ð¼Ñ‹ Ð±ÑƒÐ´ÐµÐ¼ Ð¿ÐµÑ€ÐµÐ´Ð°Ð²Ð°Ñ‚ÑŒ ÑƒÐºÐ°Ð·Ð°Ñ‚ÐµÐ»ÑŒ Ð¿Ð¾ÑÑ‚Ð¾Ð¼Ñƒ Ñ€Ð°Ð·Ð¼ÐµÑ€ Ð¾Ð´Ð¸Ð½Ð½Ð°ÐºÐ¾Ð²
+		//array->values = (ElementType*)realloc(array->values, array->capacity * sizeof(ElementType));//î÷åâèäíî ìû áóäåì ïåðåäàâàòü óêàçàòåëü ïîýòîìó ðàçìåð îäèííàêîâ
 		auto tmp=  malloc(array->capacity * sizeof(ElementType));
 		memcpy(tmp, array->values, sizeof(ElementType) * array->size);
 		free(array->values);
 		array->values = tmp;
 
 	}
-	if (index == array->size + 1)// Ð² ÐºÐ¾Ð½ÐµÑ† 
+	if (index == array->size + 1)// â êîíåö 
 	{
 		array->values[index] = value;
 	}
-	else// ÐºÑƒÐ´Ð°-Ñ‚Ð¾ 
+	else// êóäà-òî 
 	{
 		auto src = &array->values[index];
 		auto dst = src+sizeof(ElementType);
@@ -82,7 +81,7 @@ void add_value(Dynamic_Array* array, ElementType value, int index)
 }
 int remove_value(Dynamic_Array* array,int index);
 {
-	if (array->size >= index || index<0) //ÐµÑÐ»Ð¸ array size 0 Ð¾Ð½ Ð±ÑƒÐ´ÐµÑ‚Ð¼ÐµÐ½ÑŒÑˆÐµ Ð¸Ð»Ð¸ Ñ€Ð°Ð²ÐµÐ½ Ð¸Ð½Ð´ÐµÐºÑ
+	if (array->size >= index || index<0) //åñëè array size 0 îí áóäåòìåíüøå èëè ðàâåí èíäåêñ
 	{
 		perror("ivalid index");
 		return -1;
@@ -94,7 +93,7 @@ int remove_value(Dynamic_Array* array,int index);
 }
 Dynamic_Array* map(Dynamic_Array* array, ElementType(*)(ElementType) func,int index1, int index2)
 {
-	if (array && func)
+	if (array != NULL && func != NULL)
 	{
 		auto result = Dynamic_Array * create_void_Array(array->size);
 		result->size = array->size;
@@ -111,9 +110,10 @@ Dynamic_Array* map(Dynamic_Array* array, ElementType(*)(ElementType) func,int in
 		perror("ivalid data format");
 	}
 }
+
 Dynamic_Array* where(Dynamic_Array* array, bool(*)(ElementType) predicate)
 {
-	if (array && predicate )
+	if (array != NULL && predicate != NULL )
 	{
 		auto result = Dynamic_Array * create_void_Array(array->size);
 		for (int i = 0; i < array->size; i++)
@@ -130,9 +130,10 @@ Dynamic_Array* where(Dynamic_Array* array, bool(*)(ElementType) predicate)
 		perror("ivalid data format");
 	}
 }
+
 Dynamic_Array* concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
 {
-	if (array1&& array2)
+	if (array1 != NULL && array2 != NULL)
 	{
 		result = create_void_Array(array1->capacity + array2->capacity);
 		result->size = array1->size + array2->size;
@@ -145,9 +146,10 @@ Dynamic_Array* concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
 		perror("ivalid data format");
 	}
 }
+
 void remove_Array(Dynamic_Array* array)
 {
-	if (array)
+	if (array != NULL)
 	{
 		free(array->values);
 		free(array);

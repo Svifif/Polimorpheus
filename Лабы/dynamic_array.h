@@ -1,5 +1,5 @@
-#indef DYNAMIC_ARRAY //РїСЂРѕРІРµСЂСЏРµС‚ РµСЃС‚СЊ Р»Рё DYNAMIC_ARRAY.H РµСЃР»Рё РµСЃС‚СЊ РёР·Р±РµРіР°РµРј РѕС€РёР±РєРё 
-#define DYNAMIC_ARRAY // РѕРїСЂРµРґРµР»СЏРµРј СЌС‚РѕС‚ РјР°РєСЂРѕСЃ
+#indef DYNAMIC_ARRAY //проверяет есть ли DYNAMIC_ARRAY.H если есть избегаем ошибки 
+#define DYNAMIC_ARRAY // определяем этот макрос
 #include <stdlib.h>
 //
 //union {
@@ -12,9 +12,9 @@ typedef  void* ElementType;
 
 typedef struct Dynamic_Array
 {
-	ElementType* values; // РјР°СЃСЃРёРІ СѓРєР°Р·Р°С‚РµР»РµР№ 
-	int size;//С‚РµРєСѓС‰Рµ РєРѕР»РёС‡РµСЃРІРѕ СЏС‡РµРµРє 
-	int capacity;// СЃРєРѕР»СЊРєРѕ СЏС‡РµРµРє РјРѕР¶РµРј РїРѕРјРµСЃС‚РёС‚СЊ
+	ElementType* values; // массив указателей 
+	int size;//текуще количесво ячеек 
+	int capacity;// сколько ячеек можем поместить
 };
 Dynamic_Array* create_Array(int assumed_capacity);
 Dynamic_Array* add_value(Dynamic_Array* array, ElementType value, int index);
@@ -28,4 +28,4 @@ void cpy_array(Dynamic_Array* array, int index1, int index2);
 
 
 
-#endif// С‡С‚РѕР± РёР·Р±РµР¶Р°С‚СЊ РѕС€РёР±РѕРє 
+#endif// чтоб избежать ошибок 
