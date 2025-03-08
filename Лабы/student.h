@@ -1,6 +1,7 @@
 #ifndef STUDENT
+#define STUDENT
 #include "person.h"
-const char const* Student_info = "student";
+
 struct Student
 {
 	struct Person person;
