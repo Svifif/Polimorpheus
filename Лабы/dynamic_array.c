@@ -4,7 +4,7 @@
  принимает значение  assumed_capacity- предполагаемый размер массива,
  возвращает указатель на массив или пустой указатель в случае ошибки.
 */
-Dynamic_Array* create_void_Array(int assumed_capacity)
+Dynamic_Array* create_Array(int assumed_capacity, TypeInfo typeinfo)
 {
 	if (assumed_capacity < 0)
 	{
@@ -20,6 +20,7 @@ Dynamic_Array* create_void_Array(int assumed_capacity)
 	array->values = malloc(assumed_capacity * sizeof(ElementType));
 	array->size = 0;
 	array->capacity = assumed_capacity;
+	array->typeinfo = typeinfo;
 	return array; // пусть возвращает указатель на массив
 }
 
@@ -85,7 +86,7 @@ int add_value(Dynamic_Array* array, ElementType value, int index)
 	{
 		auto src = &array->values[index];
 		auto dst = src+sizeof(ElementType);
-		memcpy(dst, src, (array->size) * sizeof(ElementType));
+		memcpy(dst, src, (array->size - index) * sizeof(ElementType));
 		array->values[index] = value;
 	}
 	array->size++;
@@ -114,7 +115,7 @@ Dynamic_Array* map(Dynamic_Array* array, LpMapFunction func)
 		perror("ivalid data format");
 		return NULL;
 	}
-	Dynamic_Array* result = create_void_Array(array->size);
+	Dynamic_Array* result = create_Array(array->size, array->typeinfo);
 	result->size = array->size;
 	for (int i = 0; i < array->size; i++)
 	{
@@ -139,7 +140,7 @@ Dynamic_Array* where(Dynamic_Array* array, LpWhereFunction predicate)
 		return NULL;
 	}
 
-	Dynamic_Array* result =  create_void_Array(array->size);
+	Dynamic_Array* result =  create_Array(array->size, array->typeinfo);
 	for (int i = 0; i < array->size; i++)
 	{
 		if (predicate(array->values[i]) == TRUE)
@@ -159,7 +160,13 @@ Dynamic_Array* concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
 		perror("ivalid data format");
 		return NULL;
 	}
-	Dynamic_Array* result = create_void_Array(array1->size + array2->size);
+	if (array1->typeinfo.getType() != array2->typeinfo.getType())
+	{
+		perror("ivalid array types");
+		return NULL;
+	}
+
+	Dynamic_Array* result = create_Array(array1->size + array2->size, array1->typeinfo);
 	result->size = array1->size + array2->size;
 	memcpy(result->values, array1->values, array1->size * sizeof(ElementType));
 	memcpy(result->values + array1->size * sizeof(ElementType), array2->values, array2->size * sizeof(ElementType));
