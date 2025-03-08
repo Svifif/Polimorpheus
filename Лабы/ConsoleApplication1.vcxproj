@@ -131,10 +131,14 @@
     <ClCompile Include="dynamic_array.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="person.c" />
+    <ClCompile Include="student.c" />
+    <ClCompile Include="teacher.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dynamic_array.h" />
     <ClInclude Include="person.h" />
+    <ClInclude Include="student.h" />
+    <ClInclude Include="teacher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

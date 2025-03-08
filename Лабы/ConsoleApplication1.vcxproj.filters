@@ -24,12 +24,24 @@
     <ClCompile Include="person.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="student.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="teacher.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dynamic_array.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="person.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="student.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="teacher.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
