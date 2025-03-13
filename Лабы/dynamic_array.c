@@ -1,26 +1,38 @@
 #include "dynamic_array.h"
 
+TypeInfo new_TypeInfo( size_t size, void (*print)(void*), char* (*getType)())
+{
+	TypeInfo info;
+	info.size = size;
+	info.print = print;
+	info.getType = getType;
+	return info;
+}
+
+const Dynamic_Array NullArray = { .values = NULL, .size = 0, .capacity = 0, .typeinfo = NULL };
+
 /* функция создает пустой массив с параметром size=0,
  принимает значение  assumed_capacity- предполагаемый размер массива,
  возвращает указатель на массив или пустой указатель в случае ошибки.
 */
-Dynamic_Array* create_Array(int assumed_capacity, TypeInfo typeinfo)
+Dynamic_Array create_Array(int assumed_capacity, TypeInfo typeinfo)
 {
 	if (assumed_capacity < 0)
 	{
 		perror("capacity can`t  be <0");
 		/*exit();*/
-		return NULL;
+		return NullArray;
 	}
 	//if (values_size <= 0)
 	//{
 	//	perror("values_size can`t  be <=0");
 	//}
-	Dynamic_Array* array = (Dynamic_Array*)malloc(sizeof(Dynamic_Array));//приведение типа + выделяем память
-	array->values = malloc(assumed_capacity * sizeof(ElementType));
-	array->size = 0;
-	array->capacity = assumed_capacity;
-	array->typeinfo = typeinfo;
+	Dynamic_Array array = {
+		.values = malloc(assumed_capacity * sizeof(ElementType)),
+		.size = 0,
+		.capacity = assumed_capacity,
+		.typeinfo = typeinfo
+	};
 	return array; // пусть возвращает указатель на массив
 }
 
@@ -49,6 +61,20 @@ Dynamic_Array* create_Array(int assumed_capacity, TypeInfo typeinfo)
 //}
 
 
+ElementType get_value(Dynamic_Array* array, int index) {
+	if (index < 0)
+	{
+		perror("index can`t  be <0");
+		return NULL;
+	}
+	if (index > (array->size)) //+1 не надо так как индексация с 0 (это случай если a, b, c, _ ,хотим добавить)
+	{
+		perror("list index out of range");
+		return NULL;
+	}
+	return array->values[index];
+}
+
 /// <summary>
 /// Добавляет элемент в массив
 /// </summary>
@@ -56,8 +82,13 @@ Dynamic_Array* create_Array(int assumed_capacity, TypeInfo typeinfo)
 /// <param name="value">элемент для добавления</param>
 /// <param name="index">куда добавить</param>
 /// <returns>возвращает 0 если успешно, -1 если неуспешно</returns>
-int add_value(Dynamic_Array* array, ElementType value, int index)
+int add_value(Dynamic_Array* array, ElementType value, int index, TypeInfo typeinfo)
 {
+	if (array->typeinfo.getType != typeinfo.getType)
+	{
+		perror("wrong walue type");
+		return -1;
+	}
 	if (index < 0)
 	{
 		perror("index can`t  be <0");
@@ -91,16 +122,21 @@ int add_value(Dynamic_Array* array, ElementType value, int index)
 	}
 	array->size++;
 }
-/*удаляет элемент массива по индексу
-возврящет 0 если успешно, -1 если нет */
+
+/// <summary>
+/// удаляет элемент массива по индексу
+/// </summary>
+/// <param name="array"></param>
+/// <param name="index"></param>
+/// <returns> возврящет 0 если успешно, -1 если нет</returns>
 int remove_value(Dynamic_Array* array,int index)
 {
-	if (array->size >= index || index<0) //если array size 0 он будетменьше или равен индекс
+	if (array->size <= index || index<0) //если array size 0 он будетменьше или равен индекс
 	{
 		perror("ivalid index");
 		return -1;
 	}
-	auto src = array->values + index * sizeof(ElementType);
+	auto src = array->values + (index + 1) * sizeof(ElementType);
 	auto dst = src - sizeof(ElementType);
 	memcpy(dst, src, (array->size - index - 1) * sizeof(ElementType));
 	array->size--;
@@ -108,18 +144,19 @@ int remove_value(Dynamic_Array* array,int index)
 }
 /*применяет функцию к элементам массива 
 возвращает указатель на новый массив и пустой указатель в случае ошибки*/
-Dynamic_Array* map(Dynamic_Array* array, LpMapFunction func)
+Dynamic_Array map(Dynamic_Array* array, LpMapFunction func)
 {
 	if (array == NULL || func == NULL)
 	{
 		perror("ivalid data format");
-		return NULL;
+		return NullArray;
 	}
-	Dynamic_Array* result = create_Array(array->size, array->typeinfo);
-	result->size = array->size;
+	Dynamic_Array result = create_Array(array->size, array->typeinfo);
+	result.size = array->size;
+	//memcpy(dst, src, (array->size - index - 1) * sizeof(ElementType));
 	for (int i = 0; i < array->size; i++)
 	{
-		result->values[i] = func(array->values[i]);
+		result.values[i] = func(array->values[i]);
 	}
 	return result;
 
@@ -132,20 +169,20 @@ Dynamic_Array* map(Dynamic_Array* array, LpMapFunction func)
 /// <param name="array">массив</param>
 /// <param name="predicate">предикат</param>
 /// <returns>указатель</returns>
-Dynamic_Array* where(Dynamic_Array* array, LpWhereFunction predicate)
+Dynamic_Array where(Dynamic_Array* array, LpWhereFunction predicate)
 {
 	if (array == NULL || predicate == NULL)
 	{
 		perror("ivalid data format");
-		return NULL;
+		return NullArray;
 	}
 
-	Dynamic_Array* result =  create_Array(array->size, array->typeinfo);
+	Dynamic_Array result =  create_Array(array->size, array->typeinfo);
 	for (int i = 0; i < array->size; i++)
 	{
 		if (predicate(array->values[i]) == TRUE)
 		{
-			add_value(result, array->values[i], i);
+			add_value(&result, array->values[i], i, array->typeinfo);
 		}
 	}
 	return result;
@@ -153,37 +190,35 @@ Dynamic_Array* where(Dynamic_Array* array, LpWhereFunction predicate)
 
 /*создёт новый массив путём обьединения 2 х исходных
 возвращает указатель на новый массив  и пустой указатель в случае ошибки*/
-Dynamic_Array* concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
+Dynamic_Array concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
 {
 	if (array1 == NULL || array2 == NULL)
 	{
 		perror("ivalid data format");
-		return NULL;
+		return NullArray;
 	}
 	if (array1->typeinfo.getType() != array2->typeinfo.getType())
 	{
 		perror("ivalid array types");
-		return NULL;
+		return NullArray;
 	}
 
-	Dynamic_Array* result = create_Array(array1->size + array2->size, array1->typeinfo);
-	result->size = array1->size + array2->size;
-	memcpy(result->values, array1->values, array1->size * sizeof(ElementType));
-	memcpy(result->values + array1->size * sizeof(ElementType), array2->values, array2->size * sizeof(ElementType));
+	Dynamic_Array result = create_Array(array1->size + array2->size, array1->typeinfo);
+	result.size = array1->size + array2->size;
+	memcpy(result.values, array1->values, array1->size * sizeof(ElementType));
+	memcpy(result.values + array1->size * sizeof(ElementType), array2->values, array2->size * sizeof(ElementType));
 
 	return result;
 }
-/*удаляет исходный массив 
-возвращяет 0 в случае успеха -1 в случае ошибки*/
-int remove_Array(Dynamic_Array* array)
-{
-	if (array == NULL)
-	{
-		perror("ivalid data format");
-		return -1;
 
+/// <summary>
+/// удаляет исходный массив 
+/// </summary>
+/// <param name="array"></param>
+void remove_Array(Dynamic_Array* array)
+{
+	if (array != NULL && array->values != NULL)
+	{
+		free(array->values);
 	}
-	free(array->values);
-	free(array);
-	return 0;
 }

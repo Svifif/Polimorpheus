@@ -24,10 +24,14 @@ Person new_person(char* typeInfo, char* firstName, char* middleName, char* lastN
 	user.firstName = firstName;
 	user.middleName = middleName;
 	user.lastName = lastName;
-	struct tm tm;
-	tm.tm_mday = day;
-	tm.tm_mon = month-1;
-	tm.tm_year = year-1900;
+	struct tm tm = {
+		.tm_mday = day,
+		.tm_mon = month - 1,
+		.tm_year = year - 1900,
+		.tm_hour = 0, .tm_min = 0, .tm_sec = 0,
+		.tm_isdst = -1 
+	};
+
 
 	time_t birthDate = mktime(&tm);
 	user.birthDate = birthDate;
@@ -74,10 +78,10 @@ char* get_typeInfo(Person* person)
 	return person->typeInfo;
 }
 
-void print( Person* person)
+void printPerson( Person* person)
 {
-	struct tm* now= localtime(person->birthDate);
-	printf("%s %s %s %s % d.% d.% d ", person->typeInfo, person->firstName, person->middleName, 
+	struct tm* now= localtime(&person->birthDate);
+	printf("%s %s %s %s % d.% d.% d \r\n", person->typeInfo, person->firstName, person->middleName, 
 		person->lastName, now->tm_mday, now->tm_mon + 1, now->tm_year+1900);
 
 }

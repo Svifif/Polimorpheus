@@ -28,7 +28,7 @@ time_t get_birthDate(Person* person);
 
 char* get_typeInfo(Person* person);
 
-void print(Person* person);
+void printPerson(Person* person);
 //Person* new_person(char* info, int score, int influence);
 //char have_an_inflence_on(*Person person1, *Person person2, int value);
 //char  remove_person(*Person human);
