@@ -74,26 +74,32 @@ void CreateArrayTest2() {
     if (arr.size != 10) {
         perror("Test CreateArrayTest2 failed at point 0");
     }
-
     if (get_value(&arr, 9) != &t8) {
         perror("Test CreateArrayTest2 failed at point 1");
     }
-    if (arr.size != 10) {
+    if (get_value(&arr, 2) != &t9) {
         perror("Test CreateArrayTest2 failed at point 2");
     }
-    printf("-------------------------------------------------\n");
-    for (int i = 0; i < arr.size; i++) printStudent(get_value(&arr, i));
-
-    remove_value(&arr, 0);
-
-    printf("-------------------------------------------------\n");
-    for (int i = 0; i < arr.size; i++) printStudent(get_value(&arr, i));
-
-    if (get_value(&arr, 8) != &t8) {
+    if (arr.size != 10) {
         perror("Test CreateArrayTest2 failed at point 3");
     }
-    if (arr.size != 9) {
+
+    //printf("-------------------------------------------------\n");
+    //for (int i = 0; i < arr.size; i++) printStudent(get_value(&arr, i));
+
+    remove_value(&arr, 2);
+
+    //printf("-------------------------------------------------\n");
+    //for (int i = 0; i < arr.size; i++) printStudent(get_value(&arr, i));
+
+    if (get_value(&arr, 8) != &t8) {
         perror("Test CreateArrayTest2 failed at point 4");
+    }
+    if (arr.size != 9) {
+        perror("Test CreateArrayTest2 failed at point 5");
+    }
+    if (get_value(&arr, 2) != &t2) {
+        perror("Test CreateArrayTest2 failed at point 6");
     }
     remove_Array(&arr);
 }

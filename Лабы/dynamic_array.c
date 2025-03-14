@@ -99,11 +99,10 @@ int add_value(Dynamic_Array* array, ElementType value, int index, TypeInfo typei
 		perror("list index out of range");
 		return -1;
 	}
-	if (array->capacity <= (array->size + 1))//надо увеличить массив +1 добавили новую ячейку
+	if (array->capacity <= array->size)//надо увеличить массив +1 добавили новую ячейку
 	{
 		array->capacity *= 2;
-		//array->values = (ElementType*)realloc(array->values, array->capacity * sizeof(ElementType));//очевидно мы будем передавать указатель поэтому размер одиннаков
-		auto tmp=  malloc(array->capacity * sizeof(ElementType));
+		ElementType* tmp = malloc(array->capacity * sizeof(ElementType));
 		memcpy(tmp, array->values, sizeof(ElementType) * array->size);
 		free(array->values);
 		array->values = tmp;
@@ -115,8 +114,8 @@ int add_value(Dynamic_Array* array, ElementType value, int index, TypeInfo typei
 	}
 	else// куда-то 
 	{
-		auto src = &array->values[index];
-		auto dst = src+sizeof(ElementType);
+		ElementType* src = array->values + index;
+		ElementType* dst = src + 1;
 		memcpy(dst, src, (array->size - index) * sizeof(ElementType));
 		array->values[index] = value;
 	}
@@ -136,8 +135,8 @@ int remove_value(Dynamic_Array* array,int index)
 		perror("ivalid index");
 		return -1;
 	}
-	auto src = array->values + (index + 1) * sizeof(ElementType);
-	auto dst = src - sizeof(ElementType);
+	ElementType* dst = array->values + index;
+	ElementType* src = dst + 1;
 	memcpy(dst, src, (array->size - index - 1) * sizeof(ElementType));
 	array->size--;
 	return 0;
