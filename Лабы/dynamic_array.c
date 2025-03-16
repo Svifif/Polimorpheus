@@ -106,7 +106,6 @@ int add_value(Dynamic_Array* array, ElementType value, int index, TypeInfo typei
 		memcpy(tmp, array->values, sizeof(ElementType) * array->size);
 		free(array->values);
 		array->values = tmp;
-
 	}
 	if (index == array->size + 1)// в конец 
 	{
@@ -120,6 +119,7 @@ int add_value(Dynamic_Array* array, ElementType value, int index, TypeInfo typei
 		array->values[index] = value;
 	}
 	array->size++;
+	return 1;
 }
 
 /// <summary>
@@ -181,7 +181,7 @@ Dynamic_Array where(Dynamic_Array* array, LpWhereFunction predicate)
 	{
 		if (predicate(array->values[i]) == TRUE)
 		{
-			add_value(&result, array->values[i], i, array->typeinfo);
+			add_value(&result, array->values[i], result.size, array->typeinfo);
 		}
 	}
 	return result;
@@ -196,7 +196,7 @@ Dynamic_Array concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
 		perror("ivalid data format");
 		return NullArray;
 	}
-	if (array1->typeinfo.getType() != array2->typeinfo.getType())
+	if ((array1->typeinfo.getType) != (array2->typeinfo.getType))
 	{
 		perror("ivalid array types");
 		return NullArray;
@@ -205,7 +205,7 @@ Dynamic_Array concatenate(Dynamic_Array* array1, Dynamic_Array* array2)
 	Dynamic_Array result = create_Array(array1->size + array2->size, array1->typeinfo);
 	result.size = array1->size + array2->size;
 	memcpy(result.values, array1->values, array1->size * sizeof(ElementType));
-	memcpy(result.values + array1->size * sizeof(ElementType), array2->values, array2->size * sizeof(ElementType));
+	memcpy(result.values + array1->size , array2->values, array2->size * sizeof(ElementType));
 
 	return result;
 }

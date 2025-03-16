@@ -103,12 +103,77 @@ void CreateArrayTest2() {
     }
     remove_Array(&arr);
 }
-
+void CreateArrayTest3()
+{
+    TypeInfo ti1 = new_TypeInfo(sizeof(struct Student), &printStudent, &get_StudentInfo);
+    struct Student t0 = new_student("Karpov", "Vladimir", "Pavlovich", 10, 3, 1999);
+    TypeInfo ti2 = new_TypeInfo(sizeof(struct Teacher), &printTeacher, &get_TeacherInfo);
+    struct Teacher t1 = new_teacher("Kuznetsov", "Ivan", "Vladislavovich", 12, 7, 1985);
+    Dynamic_Array arr = create_Array(9, ti1);
+    add_value(&arr, &t0, 0, ti1);
+    if (add_value(&arr, &t1, 0, ti2) == -1)
+    {
+        printf("test CreateArrayTest3 succeeded\n");
+    }
+    remove_Array(&arr);
+}
+bool predicat(struct Student *pointer)
+{
+    if (pointer->person.firstName[0] == 'K')
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+void CreateArrayTest4()
+{
+    TypeInfo ti = new_TypeInfo(sizeof(struct Student), &printStudent, &get_StudentInfo);
+    struct Student t0 = new_student("Karpov", "Vladimir", "Pavlovich", 10, 3, 1999);
+    struct Student t1 = new_student("Sokolov", "Vladimir", "Andreevich", 25, 7, 2007);
+    Dynamic_Array arr1 = create_Array(2, ti);
+    add_value(&arr1, &t0, 0, ti);
+    add_value(&arr1, &t1, 1, ti);
+    Dynamic_Array arr2 = create_Array(2, ti);
+    struct Student t2 = new_student("Sokolov", "Andrei", "Romanovich", 5, 10, 2007);
+    struct Student t3 = new_student("Karpov", "Andrei", "Dmitrievich", 2, 4, 2000);
+    add_value(&arr2, &t2, 0, ti);
+    add_value(&arr2, &t3, 1, ti);
+    Dynamic_Array arr3 = concatenate(&arr1, &arr2);
+    if ((arr3.size == 4) && (get_value(&arr3, 0) == &t0) && (get_value(&arr3, 1) == &t1) && (get_value(&arr3, 2) == &t2) && (get_value(&arr3, 3) == &t3))
+    {
+        printf("test CreateArrayTest4 succeeded\n");
+    }
+    else
+    {
+        printf("test CreateArrayTest4 failed at point 1\n");
+    }
+    //for (int i = 0; i < arr3.size; i++) printStudent(get_value(&arr3, i));
+   
+    Dynamic_Array arr4=where(&arr3, &predicat);
+    //for (int i = 0; i < arr4.size; i++) printStudent(get_value(&arr4, i));
+    if ((arr4.size == 2) && (get_value(&arr4, 0) == &t0) && (get_value(&arr4, 1) == &t3))
+    {
+        printf("test CreateArrayTest4 succeeded\n");
+    }
+    else
+    {
+        printf("test CreateArrayTest4 failed at point 1\n");
+    }
+    remove_Array(&arr1);
+    remove_Array(&arr2);
+    remove_Array(&arr3);
+    remove_Array(&arr4);
+}
 int main()
 {
     //CreatePersonTest1();
     CreateArrayTest1();
     CreateArrayTest2();
+    CreateArrayTest3();
+    CreateArrayTest4();
     return 0;
 }
 
