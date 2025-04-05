@@ -221,7 +221,7 @@ public:
     }
 
     // O(n) 
-    void erase(size_t index)
+    void pop(size_t index)
     {
         if (index >= size)
         {
@@ -355,6 +355,25 @@ public:
         other.head = nullptr;
         other.tail = nullptr;
         other.size = 0;
+    }
+    //O(n)
+    LinkedList<ElementType> GetSubList(size_t index1, size_t index2) const
+    {
+        if (index1 >= size || index2 >= size || index1 > index2)
+        {
+            throw std::out_of_range("Index out of range");
+        }
+
+        LinkedList<ElementType> subList;
+        const Node* current = get_node(index1);
+
+        for (size_t i = index1; i <= index2; ++i)
+        {
+            subList.push_back(current->data);
+            current = current->next;
+        }
+
+        return subList;
     }
 
 private:
