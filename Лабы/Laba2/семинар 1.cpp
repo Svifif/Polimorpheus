@@ -78,7 +78,7 @@ public:
 // private: доступно только внутри методов класса
 
 template<typename T>
-class LinkedList: public Container<T> {
+class LinkedList: public Container<ElementType> {
 public:
     LinkedList() = default;
 
@@ -166,7 +166,7 @@ private:
 };
 
 template<typename T>
-void printContainer(Container<T> &container) {
+void printContainer(Container<ElementType> &container) {
     std::cout << container.toString() << std::endl;
 }
 

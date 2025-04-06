@@ -14,7 +14,7 @@ public:
         , size(0) {}
 
     // Обычный конструктор копирования
-    DynamicArray(const DynamicArray<T>& other) {
+    DynamicArray(const DynamicArray<ElementType>& other) {
         data = new T[other.size];
         size = other.size;
         for (int i = 0; i < size; i++) {
@@ -23,7 +23,7 @@ public:
     }
 
     // Конструктор копирования по мув ссылке
-    DynamicArray(DynamicArray<T>&& other) {
+    DynamicArray(DynamicArray<ElementType>&& other) {
         data = other.data;
         size = other.size;
 
@@ -32,7 +32,7 @@ public:
     }
 
     // Обычный оператор присвоения
-    DynamicArray& operator=(const DynamicArray<T>& other) {
+    DynamicArray& operator=(const DynamicArray<ElementType>& other) {
         if (this == &other) {
             return *this;
         }
@@ -50,7 +50,7 @@ public:
     }
 
     // Оператор присвоения по мув ссылке
-    DynamicArray& operator=(DynamicArray<T>&& other) {
+    DynamicArray& operator=(DynamicArray<ElementType>&& other) {
         if (this == &other) {
             return *this;
         }
@@ -182,7 +182,7 @@ public:
 };
 
 template<typename T>
-class ArraySequence: public Sequence<T> {
+class ArraySequence: public Sequence<ElementType> {
 public:
     void Append(T data) override {
         array.Resize(array.GetSize() + 1);
@@ -193,7 +193,7 @@ public:
         //...
     }
 private:
-    DynamicArray<T> array;
+    DynamicArray<ElementType> array;
 };
 
 // Итераторы на обычных массивах

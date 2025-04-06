@@ -2,7 +2,17 @@
 #include <algorithm>
 #include <utility>
 template<typename ElementType> //¬ определени€х шаблонов typename предоставл€етс€ указание компил€тору о том, что неизвестный идентификатор €вл€етс€ типом.¬ списках параметров шаблона используетс€ дл€ указани€ параметра типа.
-
+/// <summary>
+///  void resize(size_t new_capcity)
+/// operator=
+/// operator[]
+/// push_back(const ElementType& value)
+/// set(const ElementType& object, size_t index)
+/// get(size_t index)
+/// swap(DynamicArray& other)
+/// get_size()
+/// get_capacity()
+/// </summary>
 class DynamicArray
 {
 private:
