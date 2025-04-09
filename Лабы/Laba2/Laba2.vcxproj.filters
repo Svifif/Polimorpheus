@@ -33,16 +33,16 @@
     <ClCompile Include="Sequence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MASeqwence.cpp">
+    <ClCompile Include="MASequence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IMASeqwence.cpp">
+    <ClCompile Include="IMASequence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MLLSeqwence.cpp">
+    <ClCompile Include="MLLSequence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ILLSeqwence.cpp">
+    <ClCompile Include="ILLSequence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
