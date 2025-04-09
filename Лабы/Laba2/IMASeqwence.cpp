@@ -1,31 +1,18 @@
+#include "Sequence.cpp"
 #include "DynamicArray.cpp"
 
 template<typename ElementType>
-class Sequence
-{
-public:
-    virtual ~Sequence() = default;
-    virtual ElementType GetFirst() const = 0;
-    virtual ElementType GetLast() const = 0;
-    virtual ElementType Get(int index) const = 0;
-    virtual Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) const = 0;
-    virtual int GetLength() const = 0;
-    virtual Sequence<ElementType>* Append(ElementType item) = 0;
-    virtual Sequence<ElementType>* Prepend(ElementType item) = 0;
-    virtual Sequence<ElementType>* InsertAt(ElementType item, int index) = 0;
-    virtual Sequence<ElementType>* Concat(Sequence<ElementType>* other) const = 0;
-};
-
-template<typename ElementType>
-class ArraySequence : public Sequence<ElementType>
+class ImArraySequence : public Sequence<ElementType>
 {
 private:
     DynamicArray<ElementType>* array;
 
-public:
-    ArraySequence() : array(new DynamicArray<ElementType>()) {}
+    explicit ImArraySequence(DynamicArray<ElementType>* arr) : array(arr) {}
 
-    ArraySequence(ElementType* items, int count) : array(new DynamicArray<ElementType>())
+public:
+    ImArraySequence() : array(new DynamicArray<ElementType>()) {}
+
+    ImArraySequence(ElementType* items, int count) : array(new DynamicArray<ElementType>())
     {
         for (int i = 0; i < count; ++i)
         {
@@ -33,7 +20,7 @@ public:
         }
     }
 
-    ArraySequence(const ArraySequence<ElementType>& other) : array(new DynamicArray<ElementType>())
+    ImArraySequence(const ImArraySequence& other) : array(new DynamicArray<ElementType>())
     {
         for (int i = 0; i < other.GetLength(); ++i)
         {
@@ -41,9 +28,20 @@ public:
         }
     }
 
-    ~ArraySequence() override
+    ImArraySequence(ImArraySequence&& other) noexcept : array(other.array)
+    {
+        other.array = nullptr;
+    }
+
+    ~ImArraySequence() override
     {
         delete array;
+    }
+
+    const ElementType& operator[](size_t index) const
+    {
+        if (index >= array->get_size()) throw std::out_of_range("Index out of range");
+        return (*array)[index];
     }
 
     ElementType GetFirst() const override
@@ -72,28 +70,32 @@ public:
         return array->get_size();
     }
 
-    Sequence<ElementType>* Append(ElementType item) override
+    Sequence<ElementType>* Append(ElementType item) const override
     {
-        array->push_back(item);
-        return this;
+        DynamicArray<ElementType>* new_array = new DynamicArray<ElementType>(*array);
+        new_array->push_back(item);
+        return new ImArraySequence(new_array);
     }
 
-    Sequence<ElementType>* Prepend(ElementType item) override
+    Sequence<ElementType>* Append(ElementType&& item) const override
+    {
+        DynamicArray<ElementType>* new_array = new DynamicArray<ElementType>(*array);
+        new_array->push_back(std::move(item));
+        return new ImArraySequence(new_array);
+    }
+
+    Sequence<ElementType>* Prepend(ElementType item) const override
     {
         DynamicArray<ElementType>* new_array = new DynamicArray<ElementType>();
         new_array->push_back(item);
-
         for (int i = 0; i < array->get_size(); ++i)
         {
             new_array->push_back(array->get(i));
         }
-
-        delete array;
-        array = new_array;
-        return this;
+        return new ImArraySequence(new_array);
     }
 
-    Sequence<ElementType>* InsertAt(ElementType item, int index) override
+    Sequence<ElementType>* InsertAt(ElementType item, int index) const override
     {
         if (index < 0 || index > array->get_size())
         {
@@ -101,22 +103,16 @@ public:
         }
 
         DynamicArray<ElementType>* new_array = new DynamicArray<ElementType>();
-
         for (int i = 0; i < index; ++i)
         {
             new_array->push_back(array->get(i));
         }
-
         new_array->push_back(item);
-
         for (int i = index; i < array->get_size(); ++i)
         {
             new_array->push_back(array->get(i));
         }
-
-        delete array;
-        array = new_array;
-        return this;
+        return new ImArraySequence(new_array);
     }
 
     Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) const override
@@ -126,34 +122,51 @@ public:
             throw std::out_of_range("Invalid index range");
         }
 
-        ArraySequence<ElementType>* subseq = new ArraySequence<ElementType>();
+        DynamicArray<ElementType>* new_array = new DynamicArray<ElementType>();
         for (int i = startIndex; i <= endIndex; ++i)
         {
-            subseq->array->push_back(array->get(i));
+            new_array->push_back(array->get(i));
         }
-
-        return subseq;
+        return new ImArraySequence(new_array);
     }
 
     Sequence<ElementType>* Concat(Sequence<ElementType>* other) const override
     {
-        ArraySequence<ElementType>* result = new ArraySequence<ElementType>(*this);
+        if (!other) throw std::invalid_argument("Other sequence cannot be null");
+
+        DynamicArray<ElementType>* new_array = new DynamicArray<ElementType>(*array);
         for (int i = 0; i < other->GetLength(); ++i)
         {
-            result->array->push_back(other->Get(i));
+            new_array->push_back(other->Get(i));
         }
-        return result;
+        return new ImArraySequence(new_array);
     }
+
+    Sequence<ElementType>* Concat(Sequence<ElementType>&& other) const override
+    {
+        if (auto* otherSeq = dynamic_cast<ImArraySequence*>(&other))
+        {
+            DynamicArray<ElementType>* new_array = new DynamicArray<ElementType>(*array);
+            for (int i = 0; i < otherSeq->GetLength(); ++i)
+            {
+                new_array->push_back(std::move((*otherSeq)[i]));
+            }
+            return new ImArraySequence(new_array);
+        }
+        throw std::invalid_argument("Invalid sequence type");
+    }
+
     template<typename ResultType>
     Sequence<ResultType>* Map(ResultType(*mapper)(ElementType)) const
     {
-        Sequence<ResultType>* result = new ArraySequence<ResultType>();
+        Sequence<ResultType>* result = new ImArraySequence<ResultType>();
         for (int i = 0; i < GetLength(); ++i)
         {
             result->Append(mapper(Get(i)));
         }
         return result;
     }
+
     template<typename ResultType>
     ResultType Reduce(ResultType(*reducer)(ResultType, ElementType), ResultType initial) const
     {
@@ -164,9 +177,10 @@ public:
         }
         return accumulator;
     }
+
     Sequence<ElementType>* Where(bool (*predicate)(ElementType)) const
     {
-        Sequence<ElementType>* result = new ArraySequence<ElementType>();
+        Sequence<ElementType>* result = new ImArraySequence<ElementType>();
         for (int i = 0; i < GetLength(); ++i)
         {
             ElementType current = Get(i);
@@ -177,16 +191,10 @@ public:
         }
         return result;
     }
-    template<typename OtherType, typename ResultType>
-    Sequence<ResultType>* Zip(Sequence<OtherType>* other, ResultType(*zipper)(ElementType, OtherType)) const
-    {
-        Sequence<ResultType>* result = new ArraySequence<ResultType>();
-        int minLength = std::min(GetLength(), other->GetLength());
 
-        for (int i = 0; i < minLength; ++i)
-        {
-            result->Append(zipper(Get(i), other->Get(i)));
-        }
-        return result;
+protected:
+    Sequence<ElementType>* CreateEmpty() const override
+    {
+        return new ImArraySequence<ElementType>();
     }
 };

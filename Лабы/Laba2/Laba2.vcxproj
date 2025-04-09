@@ -128,9 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DynamicArray.cpp" />
+    <ClCompile Include="ILLSeqwence.cpp" />
+    <ClCompile Include="IMASeqwence.cpp" />
     <ClCompile Include="Laba2.cpp" />
     <ClCompile Include="LinckedList.cpp" />
-    <ClCompile Include="Seqwence.cpp" />
+    <ClCompile Include="MLLSeqwence.cpp" />
+    <ClCompile Include="Sequence.cpp" />
+    <ClCompile Include="MASeqwence.cpp" />
     <ClCompile Include="семинар 1.cpp" />
     <ClCompile Include="семинар 2.cpp" />
   </ItemGroup>

@@ -30,7 +30,19 @@
     <ClCompile Include="DynamicArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Seqwence.cpp">
+    <ClCompile Include="Sequence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MASeqwence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IMASeqwence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MLLSeqwence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ILLSeqwence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

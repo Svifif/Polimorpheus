@@ -20,15 +20,15 @@ private:
     size_t capacity=0;
     size_t size=0;
     //O(n)
-    void resize(size_t new_capcity)
+    void resize(size_t new_capacity) // Исправлено написание
     {
-        if (new_capcity < size)
+        if (new_capacity < size)
         {
-            throw std::invalid_argument("Capacity can`t  be < size ");/*тип ошибки*/
+            throw std::invalid_argument("Capacity can't be < size");
         }
         ElementType* new_data = new ElementType[new_capacity];
         for (size_t i = 0; i < size; ++i) {
-            new_data[i] = std::move(data[i]);//?
+            new_data[i] = std::move(data[i]);
         }
         delete[] data;
         data = new_data;
