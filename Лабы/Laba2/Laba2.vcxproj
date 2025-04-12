@@ -127,16 +127,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DynamicArray.cpp" />
+    <ClCompile Include="ASequence.hpp" />
+    <ClCompile Include="DynamicArray.hpp" />
+    <ClCompile Include="DynamicArrayTests.cpp" />
     <ClCompile Include="ILLSequence.cpp" />
     <ClCompile Include="IMASequence.cpp" />
     <ClCompile Include="Laba2.cpp" />
-    <ClCompile Include="LinckedList.cpp" />
+    <ClCompile Include="LinkedList.hpp" />
+    <ClCompile Include="LLSequence.hpp" />
     <ClCompile Include="MLLSequence.cpp" />
-    <ClCompile Include="Sequence.cpp" />
+    <ClCompile Include="Sequence.hpp" />
     <ClCompile Include="MASequence.cpp" />
-    <ClCompile Include="семинар 1.cpp" />
-    <ClCompile Include="семинар 2.cpp" />
+    <ClCompile Include="TLinkedList.cpp" />
+    <ClCompile Include="TLinkedList.hpp" />
+    <ClCompile Include="TrackedObject.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DynamicArrayTests.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TrackedObject.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

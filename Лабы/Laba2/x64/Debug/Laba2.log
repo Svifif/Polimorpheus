@@ -1,25 +1,5 @@
-﻿  DynamicArray.cpp
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(160,5): error C2059: syntax error: '{'
-      C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(160,5):
-      the template instantiation context (the oldest one first) is
-          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(6,7):
-          while compiling class template 'DynamicArray'
-  
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(160,5): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(19,49): error C3861: 'new_capacity': identifier not found
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(25,20): error C3861: 'new_capacity': identifier not found
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(19,49): error C2065: 'new_capacity': undeclared identifier
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\DynamicArray.cpp(25,20): error C2065: 'new_capacity': undeclared identifier
-  LinckedList.cpp
-  Seqwence.cpp
-  семинар 1.cpp
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\семинар 1.cpp(66,25): error C2039: 'to_string': is not a member of 'std'
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\iostream(18,1):
-      see declaration of 'std'
-      C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\семинар 1.cpp(66,25):
-      the template instantiation context (the oldest one first) is
-          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\семинар 1.cpp(55,7):
-          while compiling class template 'Container'
-  
-  семинар 2.cpp
-  Generating Code...
+﻿  DynamicArrayTests.cpp
+x64\Debug\TLinkedList.obj : warning LNK4042: object specified more than once; extras ignored
+  Laba2.vcxproj -> C:\Users\artem\source\repos\Polimorpheus\Лабы\x64\Debug\Laba2.exe
+  "pwsh.exe" не является внутренней или внешней
+  командой, исполняемой программой или пакетным файлом.

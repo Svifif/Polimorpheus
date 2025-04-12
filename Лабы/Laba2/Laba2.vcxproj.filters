@@ -13,37 +13,68 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\old">
+      <UniqueIdentifier>{1ec53884-e1ae-4a14-9823-f1a3d926d446}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tests">
+      <UniqueIdentifier>{fbc35645-d73d-46f2-b1e3-6d9382a32b89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\structures">
+      <UniqueIdentifier>{1316b93e-4f23-437b-870f-85c498a121e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Laba2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LinckedList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="семинар 2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="семинар 1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DynamicArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sequence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MASequence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IMASequence.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ILLSequence.cpp">
+      <Filter>Source Files\old</Filter>
     </ClCompile>
     <ClCompile Include="MLLSequence.cpp">
+      <Filter>Source Files\old</Filter>
+    </ClCompile>
+    <ClCompile Include="IMASequence.cpp">
+      <Filter>Source Files\old</Filter>
+    </ClCompile>
+    <ClCompile Include="MASequence.cpp">
+      <Filter>Source Files\old</Filter>
+    </ClCompile>
+    <ClCompile Include="ASequence.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkedList.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LLSequence.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sequence.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TLinkedList.hpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TLinkedList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ILLSequence.cpp">
+    <ClCompile Include="DynamicArrayTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TrackedObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DynamicArrayTests.hpp">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TrackedObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
