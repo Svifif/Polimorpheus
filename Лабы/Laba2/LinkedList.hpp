@@ -305,13 +305,7 @@ public:
     }
 
     // O(n) 
-    ElementType& get_data(size_t index)
-    {
-        return get_node(index)->data;
-    }
-
-    // O(n) 
-    const ElementType& get_data(size_t index) const
+    ElementType& get_data(size_t index) const
     {
         return get_node(index)->data;
     }
@@ -337,17 +331,7 @@ public:
     }
 
     // O(1) 
-    ElementType& back() 
-    {
-        if (empty()) 
-        {
-            throw std::out_of_range("List is empty");
-        }
-        return tail->data;
-    }
-
-    // O(1) 
-    const ElementType& back() const
+    ElementType& back() const
     {
         if (empty())
         {
@@ -355,6 +339,7 @@ public:
         }
         return tail->data;
     }
+
     // O(n) 
     void concat(const LinkedList& other) 
     {
@@ -412,7 +397,7 @@ public:
 
 private:
     // O(n) 
-    Node* get_node(size_t index)
+    Node* get_node(size_t index) const
     {
         if (index >= size)
         {
@@ -426,23 +411,6 @@ private:
         }
         return current;
     }
-
-    // O(n) 
-    const Node* get_node(size_t index) const 
-    {
-        if (index >= size)
-        {
-            throw std::out_of_range("Index out of range");
-        }
-
-        const Node* current = head;
-        for (size_t i = 0; i < index; ++i)
-        {
-            current = current->next;
-        }
-        return current;
-    }
-
 
 public:
     class Iterator

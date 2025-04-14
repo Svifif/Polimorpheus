@@ -44,6 +44,19 @@ public:
     {
         data = new ElementType[capacity];
     }
+    //O(n)
+    DynamicArray(ElementType* items, size_t count) : capacity(count), size(count)
+    {
+        if (capacity > 0)
+        {
+            data = new ElementType[capacity];
+            for (size_t i = 0; i < size; ++i)
+            {
+                data[i] = items[i];
+            }
+        }
+    }
+
     //конструктор копирования
     //O(n)
     DynamicArray(const DynamicArray& other): capacity(other.capacity), size(other.size)
@@ -98,7 +111,7 @@ public:
         return *this;
     }
     // O(1)
-    ElementType operator[](size_t index)
+    ElementType& operator[](size_t index) const
     {
         return get(index);
     }
@@ -142,12 +155,11 @@ public:
         data[index] = std::move(object);
     }
     // O(1)
-    ElementType get(size_t index) 
+    ElementType& get(size_t index) const
     {
         if (index >= size) 
         {
             throw std::out_of_range("List index out of range");
-            return ElementType{};
         }
         return data[index];    
     }
@@ -166,6 +178,51 @@ public:
     size_t get_capacity() const noexcept
     { 
         return capacity; 
+    }
+// O(n)
+    void insert(const ElementType& value, size_t index)
+    {
+        if (index > size) 
+        {  // Можно вставить после последнего элемента (index == size)
+            throw std::out_of_range("Index out of range");
+        }
+        // Увеличиваем capacity при необходимости
+        if (size >= capacity)
+        {
+            resize(capacity == 0 ? 1 : capacity * 2);
+        }
+
+        // Сдвигаем элементы вправо начиная с index
+        for (size_t i = size; i > index; --i)
+        {
+            data[i] = std::move(data[i - 1]);
+        }
+
+        // Вставляем новый элемент
+        data[index] = value;
+        ++size;
+    }
+
+    // Версия для r-value ссылок
+    void insert(ElementType&& value, size_t index) 
+    {
+        if (index > size)
+        {
+            throw std::out_of_range("Index out of range");
+        }
+
+        if (size >= capacity)
+        {
+            resize(capacity == 0 ? 1 : capacity * 2);
+        }
+
+        for (size_t i = size; i > index; --i)
+        {
+            data[i] = std::move(data[i - 1]);
+        }
+
+        data[index] = std::move(value);
+        ++size;
     }
     ~DynamicArray() /*capacity  и size удаляются автоматически*/
     {

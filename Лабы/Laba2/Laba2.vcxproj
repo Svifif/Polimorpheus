@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ASequence.hpp" />
+    <ClCompile Include="ASequenceTests.cpp" />
     <ClCompile Include="DynamicArray.hpp" />
     <ClCompile Include="DynamicArrayTests.cpp" />
     <ClCompile Include="ILLSequence._cpp">
@@ -155,6 +156,7 @@
     <None Include="DynamicArrayTests.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ASequenceTests.hpp" />
     <ClInclude Include="LLSequenceTests.hpp" />
     <ClInclude Include="TrackedObject.hpp" />
   </ItemGroup>

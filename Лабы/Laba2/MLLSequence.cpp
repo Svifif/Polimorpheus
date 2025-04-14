@@ -39,7 +39,7 @@ public:
         return list.front();
     }
 
-    ElementType GetLast() const override
+    ElementType& GetLast() const override
     {
         return list.back();
     }

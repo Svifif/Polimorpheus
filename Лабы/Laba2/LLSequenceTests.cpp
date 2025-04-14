@@ -6,6 +6,7 @@
 #include <cassert>
 #include <initializer_list>
 #include <string>
+#include <utility>
 
 using namespace std;
 
@@ -169,14 +170,14 @@ void test_llseq_with_pairs()
     };
 
     // Используем конструктор с массивом
-    MLLSequence<std::pair<int, std::string>> seq(items, 3);
+    MLLSequence<pair<int, string>> seq(items, 3);
 
     assert(seq.GetLength() == 3);
     assert(seq[0].first == 1);
     assert(seq[0].second == "one");
 
     // Тестируем добавление новых элементов
-    seq.Append(std::make_pair(4, "four"));
+    seq.Append(pair<int, string>(4, "four"));
     assert(seq.GetLength() == 4);
 }
 
@@ -185,7 +186,7 @@ void test_llseq_map_operation()
     int items[] = { 1, 2, 3 };
     MLLSequence<int> seq(items, 3);
 
-    auto mapped = seq.Map<double>([](int x) { return x * 1.5; });
+    auto mapped = seq.Map<double, MLLSequence<double>>([](int x) { return x * 1.5; });
     assert(mapped.GetLength() == 3);
     assert(mapped.Get(1) == 3.0);
 }

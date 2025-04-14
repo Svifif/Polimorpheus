@@ -12,7 +12,7 @@ protected:
     {
     }
 
-    virtual LLSequence<ElementType>* GetThis() = 0;
+    //virtual LLSequence<ElementType>* GetThis() = 0;
     //virtual const LLSequence<ElementType>* GetThis() const = 0;
 
 public:
@@ -54,7 +54,7 @@ public:
         return list.front();
     }
 
-    ElementType GetLast() const override
+    ElementType& GetLast() const override
     {
         if (list.get_size() == 0)
         {
@@ -63,7 +63,7 @@ public:
         return list.back();
     }
 
-    ElementType Get(int index) const override
+    ElementType& Get(int index) const override
     {
         if (index < 0 || index >= list.get_size())
         {
@@ -153,17 +153,8 @@ public:
 
     Sequence<ElementType>* Append(ElementType item) override
     {
-        auto* result = GetThis();
+        auto* result = (LLSequence<ElementType>*) this->GetThis();
         result->list.push_back(item);
-        return result;
-    }
-
-    // Универсальный Append
-    template<typename T>
-    Sequence<ElementType>* Append(T&& item)
-    {
-        auto* result = GetThis();
-        result->list.push_back(std::forward<T>(item));
         return result;
     }
 
@@ -175,7 +166,7 @@ public:
 
     Sequence<ElementType>* Prepend(ElementType item) override
     {
-        auto* result = GetThis();
+        auto* result = (LLSequence<ElementType>*)this->GetThis();
         result->list.push_front(item);
         return result;
     }
@@ -184,7 +175,7 @@ public:
     template<typename T>
     Sequence<ElementType>* Prepend(T&& item)
     {
-        auto* result = GetThis();
+        auto* result = this->GetThis();
         result->list.push_front(std::forward<T>(item));
         return result;
     }
@@ -202,65 +193,12 @@ public:
             throw std::out_of_range("Index out of range");
         }
 
-        auto result = GetThis();
+        auto result = (LLSequence<ElementType>*)this->GetThis();
         result->list.insert(index, item);
         return result;
     }
 
-    Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) override 
-    {
-        if (startIndex < 0 || endIndex >= list.get_size() || startIndex > endIndex)
-        {
-            throw std::out_of_range("Invalid subsequence indices");
-        }
 
-        // Получаем новый объект через GetThis() (для MLL - this, для ILL - копию)
-        auto result = this->CreateEmpty();
-
-        // Заполняем подпоследовательностью
-        for (int i = startIndex; i <= endIndex; ++i) 
-        {
-            result->Append(list.get_data(i));
-        }
-
-        return result;
-    }
-
-    LLSequence<ElementType>* Concat(const Sequence<ElementType>& other) override
-    {
-        if (this == &other)
-        {
-            throw std::invalid_argument("Cannot concatenate sequence with itself");
-        }
-
-        // Создаем новую последовательность через CreateEmpty()
-        LLSequence<ElementType>* result = GetThis();
-
-        // Добавляем элементы из другой последовательности
-        for (int i = 0; i < other.GetLength(); ++i)
-        {
-            result->list.push_back(other.Get(i));
-        }
-
-        return result;
-    }
-
-
-    template<typename ResultType, typename ResultSequenceType>
-    ResultSequenceType Map(ResultType(*mapper)(ElementType))
-    {
-        if (!mapper)
-        {
-            throw std::invalid_argument("Mapper function cannot be null");
-        }
-
-        ResultSequenceType result;
-        for (int i = 0; i < GetLength(); ++i)
-        {
-            result->Append(mapper(Get(i)));
-        }
-        return result;
-    }
 
     template<typename ResultType>
     ResultType Reduce(ResultType(*reducer)(ResultType, ElementType), ResultType initial) const

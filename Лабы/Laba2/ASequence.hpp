@@ -30,14 +30,14 @@ public:
         return array[0];
     }
 
-    ElementType GetLast() const override
+    ElementType& GetLast() const override
     {
         if (array.get_size() == 0)
             throw std::out_of_range("Sequence is empty");
         return array[array.get_size() - 1];
     }
 
-    ElementType Get(int index) const override
+    ElementType& Get(int index) const override
     {
         if (index < 0 || index >= array.get_size())
             throw std::out_of_range("Index out of range");
@@ -103,15 +103,15 @@ public:
 
     Sequence<ElementType>* Append(ElementType item) override
     {
-        auto* result = GetThis();
+        auto* result = (ArraySequence<ElementType> *)GetThis();
         result->array.push_back(item);
         return result;
     }
 
     Sequence<ElementType>* Prepend(ElementType item) override
     {
-        auto* result = GetThis();
-        result->array.insert(0, item);
+        auto* result = (ArraySequence<ElementType> *) GetThis();
+        result->array.insert(item, 0);
         return result;
     }
 
@@ -120,41 +120,41 @@ public:
         if (index < 0 || index > array.get_size())
             throw std::out_of_range("Index out of range");
 
-        auto* result = GetThis();
-        result->array.insert(index, item);
+        auto result = (ArraySequence<ElementType>*)GetThis();
+        result->array.insert(item, index);
         return result;
     }
 
-    Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) const override
-    {
-        if (startIndex < 0 || endIndex >= array.get_size() || startIndex > endIndex)
-            throw std::out_of_range("Invalid subsequence indices");
+    //Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) const override
+    //{
+    //    if (startIndex < 0 || endIndex >= array.get_size() || startIndex > endIndex)
+    //        throw std::out_of_range("Invalid subsequence indices");
 
-        DynamicArray<ElementType> subArray(endIndex - startIndex + 1);
-        for (int i = startIndex; i <= endIndex; ++i)
-            subArray[i - startIndex] = array[i];
-        return new ArraySequence(std::move(subArray));
-    }
+    //    DynamicArray<ElementType> subArray(endIndex - startIndex + 1);
+    //    for (int i = startIndex; i <= endIndex; ++i)
+    //        subArray[i - startIndex] = array[i];
+    //    return new ArraySequence(std::move(subArray));
+    //}
 
-    Sequence<ElementType>* Concat(Sequence<ElementType>* other) const override
-    {
-        if (other == nullptr)
-            throw std::invalid_argument("Other sequence is null");
+    //Sequence<ElementType>* Concat(Sequence<ElementType>* other) const override
+    //{
+    //    if (other == nullptr)
+    //        throw std::invalid_argument("Other sequence is null");
 
-        auto* result = new ArraySequence(*this);
-        for (int i = 0; i < other->GetLength(); ++i)
-            result->array.push_back(other->Get(i));
-        return result;
-    }
+    //    auto* result = new ArraySequence(*this);
+    //    for (int i = 0; i < other->GetLength(); ++i)
+    //        result->array.push_back(other->Get(i));
+    //    return result;
+    //}
 
-    template<typename ResultType>
-    Sequence<ResultType>* Map(ResultType(*mapper)(ElementType)) const
-    {
-        auto* result = new ArraySequence<ResultType>();
-        for (int i = 0; i < GetLength(); ++i)
-            result->Append(mapper(Get(i)));
-        return result;
-    }
+    //template<typename ResultType>
+    //Sequence<ResultType>* Map(ResultType(*mapper)(ElementType)) const
+    //{
+    //    auto* result = new ArraySequence<ResultType>();
+    //    for (int i = 0; i < GetLength(); ++i)
+    //        result->Append(mapper(Get(i)));
+    //    return result;
+    //}
 
     template<typename ResultType>
     ResultType Reduce(ResultType(*reducer)(ResultType, ElementType), ResultType initial) const
@@ -175,10 +175,16 @@ class MArraySequence : public ArraySequence<ElementType>
 {
 protected:
     Sequence<ElementType>* GetThis() override { return this; }
+    Sequence<ElementType>* CreateEmpty()  override
+    {
+        return new MArraySequence<ElementType>(); // Просто создаем новый объект
+    }
 
 public:
+    MArraySequence() : ArraySequence<ElementType>() {};
     using ArraySequence<ElementType>::ArraySequence;
 
+    MArraySequence(const MArraySequence& other) : ArraySequence<ElementType>(other) {};
     MArraySequence(MArraySequence&& other) noexcept = default;
     MArraySequence& operator=(MArraySequence&& other) noexcept = default;
     MArraySequence& operator=(const MArraySequence& other)
@@ -196,6 +202,11 @@ class IArraySequence : public ArraySequence<ElementType>
 protected:
     Sequence<ElementType>* GetThis() override { return new IArraySequence(*this); }
 
+    Sequence<ElementType>* CreateEmpty()  override
+    {
+        return new IArraySequence<ElementType>(); // Просто создаем новый объект
+    }
+
 public:
     using ArraySequence<ElementType>::ArraySequence;
 
@@ -207,4 +218,5 @@ public:
             this->array = other.array;
         return *this;
     }
+
 };

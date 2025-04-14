@@ -1,7 +1,7 @@
 #pragma once
-#include <utility>
 #include <stdexcept>
 #include <algorithm>
+#include <utility>
 
 template<typename ElementType>
 class Sequence
@@ -10,15 +10,15 @@ public:
     virtual ~Sequence() = default;
 
     virtual ElementType GetFirst() const = 0;
-    virtual ElementType GetLast() const = 0;
-    virtual ElementType Get(int index) const = 0;
-    virtual Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex)  = 0;
+    virtual ElementType& GetLast() const = 0;
+    virtual ElementType& Get(int index) const = 0;
+    //virtual Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex)  = 0;
     virtual int GetLength() const = 0;
 
     virtual Sequence<ElementType>* Append(ElementType item) = 0;
     virtual Sequence<ElementType>* Prepend(ElementType item) = 0;
     virtual Sequence<ElementType>* InsertAt(ElementType item, int index) = 0;
-    virtual Sequence<ElementType>* Concat(const Sequence<ElementType>& other) = 0;
+    //virtual Sequence<ElementType>* Concat(const Sequence<ElementType>& other) = 0;
 
     template<typename OtherType, typename ResultType, typename ResultSequenceType>
     ResultSequenceType Zip(Sequence<OtherType>* other,
@@ -56,6 +56,7 @@ public:
             firstSeq.Append(pair.first);
             secondSeq.Append(pair.second);
         }
+        //return std::pair<ResultSequenceType1, ResultSequenceType2>(firstSeq, secondSeq);
         return std::make_pair(firstSeq, secondSeq);
     }
 
@@ -122,8 +123,63 @@ public:
         return result;
     }
 
+    virtual Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) 
+    {
+        if (startIndex < 0 || endIndex >= GetLength() || startIndex > endIndex)
+        {
+            throw std::out_of_range("Invalid subsequence indices");
+        }
+
+        // Получаем новый объект через GetThis() (для MLL - this, для ILL - копию)
+        auto result = this->CreateEmpty();
+
+        // Заполняем подпоследовательностью
+        for (int i = startIndex; i <= endIndex; ++i)
+        {
+            result->Append(Get(i));
+        }
+
+        return result;
+    }
+
+    virtual Sequence<ElementType>* Concat(const Sequence<ElementType>& other)
+    {
+        if (this == &other)
+        {
+            throw std::invalid_argument("Cannot concatenate sequence with itself");
+        }
+
+        // Создаем новую последовательность через CreateEmpty()
+        Sequence<ElementType>* result = GetThis();
+
+        // Добавляем элементы из другой последовательности
+        for (int i = 0; i < other.GetLength(); ++i)
+        {
+            result->Append(other.Get(i));
+        }
+
+        return result;
+    }
+
+    template<typename ResultType, typename ResultSequenceType>
+    ResultSequenceType Map(ResultType(*mapper)(ElementType))
+    {
+        if (!mapper)
+        {
+            throw std::invalid_argument("Mapper function cannot be null");
+        }
+
+        ResultSequenceType result;
+        for (int i = 0; i < GetLength(); ++i)
+        {
+            result.Append(mapper(Get(i)));
+        }
+        return result;
+    }
+
 protected:
 
     virtual Sequence<ElementType>* CreateEmpty()  = 0;
+    virtual Sequence<ElementType>* GetThis() = 0;
 
 };

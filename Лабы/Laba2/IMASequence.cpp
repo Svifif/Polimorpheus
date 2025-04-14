@@ -49,7 +49,7 @@ public:
         return array->get(0);
     }
 
-    ElementType GetLast() const override
+    ElementType& GetLast() const override
     {
         if (array->get_size() == 0) throw std::out_of_range("Empty sequence");
         return array->get(array->get_size() - 1);
