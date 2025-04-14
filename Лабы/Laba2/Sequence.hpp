@@ -103,6 +103,25 @@ public:
         return result;
     }
 
+    Sequence<ElementType>* Where(bool (*predicate)(ElementType))
+    {
+        if (!predicate)
+        {
+            throw std::invalid_argument("Predicate function cannot be null");
+        }
+
+        auto result = this->CreateEmpty();
+        for (int i = 0; i < GetLength(); ++i)
+        {
+            ElementType current = Get(i);
+            if (predicate(current))
+            {
+                result->Append(current);
+            }
+        }
+        return result;
+    }
+
 protected:
 
     virtual Sequence<ElementType>* CreateEmpty()  = 0;

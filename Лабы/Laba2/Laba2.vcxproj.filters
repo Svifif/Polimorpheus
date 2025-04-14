@@ -39,7 +39,7 @@
     <ClCompile Include="MASequence.cpp">
       <Filter>Source Files\old</Filter>
     </ClCompile>
-    <ClCompile Include="ASequence._hpp">
+    <ClCompile Include="ASequence.hpp">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="DynamicArray.hpp">

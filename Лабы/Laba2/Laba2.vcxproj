@@ -127,9 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ASequence._hpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="ASequence.hpp" />
     <ClCompile Include="DynamicArray.hpp" />
     <ClCompile Include="DynamicArrayTests.cpp" />
     <ClCompile Include="ILLSequence._cpp">

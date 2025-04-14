@@ -108,24 +108,10 @@ public:
         return result;
     }
 
-    Sequence<ElementType>* Append(ElementType&& item) override
-    {
-        auto* result = GetThis();
-        result->array.push_back(std::move(item));
-        return result;
-    }
-
     Sequence<ElementType>* Prepend(ElementType item) override
     {
         auto* result = GetThis();
         result->array.insert(0, item);
-        return result;
-    }
-
-    Sequence<ElementType>* Prepend(ElementType&& item) override
-    {
-        auto* result = GetThis();
-        result->array.insert(0, std::move(item));
         return result;
     }
 
@@ -136,16 +122,6 @@ public:
 
         auto* result = GetThis();
         result->array.insert(index, item);
-        return result;
-    }
-
-    Sequence<ElementType>* InsertAt(ElementType&& item, int index) override
-    {
-        if (index < 0 || index > array.get_size())
-            throw std::out_of_range("Index out of range");
-
-        auto* result = GetThis();
-        result->array.insert(index, std::move(item));
         return result;
     }
 
@@ -171,20 +147,6 @@ public:
         return result;
     }
 
-    Sequence<ElementType>* Concat(Sequence<ElementType>&& other) override
-    {
-        if (&other == nullptr)
-            throw std::invalid_argument("Other sequence is null");
-
-        if (auto* otherSeq = dynamic_cast<ArraySequence*>(&other))
-        {
-            auto* result = GetThis();
-            result->array.concat(std::move(otherSeq->array));
-            return result;
-        }
-        throw std::invalid_argument("Incompatible sequence type");
-    }
-
     template<typename ResultType>
     Sequence<ResultType>* Map(ResultType(*mapper)(ElementType)) const
     {
@@ -203,23 +165,7 @@ public:
         return accumulator;
     }
 
-    Sequence<ElementType>* Where(bool (*predicate)(ElementType)) const
-    {
-        auto* result = new ArraySequence<ElementType>();
-        for (int i = 0; i < GetLength(); ++i)
-        {
-            ElementType current = Get(i);
-            if (predicate(current))
-                result->Append(current);
-        }
-        return result;
-    }
 protected:
-    template<typename T>
-    static Sequence<T>* CreateEmpty()
-    {
-        return new LLSequence<T>();
-    }
 
 };
 
