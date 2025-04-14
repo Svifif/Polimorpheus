@@ -214,6 +214,13 @@ public:
         }
         return result;
     }
+protected:
+    template<typename T>
+    static Sequence<T>* CreateEmpty()
+    {
+        return new LLSequence<T>();
+    }
+
 };
 
 // Mutable версия

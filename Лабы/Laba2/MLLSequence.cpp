@@ -1,11 +1,10 @@
-#include "Sequence.cpp"
-#include "LinckedList.cpp"
+
 
 template<typename ElementType>
 class MLLSequence : public Sequence<ElementType>
 {
 private:
-    LinkedList<ElementType> list;
+    //LinkedList<ElementType> list;
 
     MLLSequence(const LinkedList<ElementType>& otherList) : list(otherList) {}
 

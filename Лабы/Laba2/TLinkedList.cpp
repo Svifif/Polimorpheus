@@ -248,7 +248,7 @@ void test_iterators()
     assert(sum == 6);
 }
 
-void run_linked_list_tests()
+void run_linked_list_tests(void)
 {
     test_destructor1();
     test_constructors1();

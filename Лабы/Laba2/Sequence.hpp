@@ -12,64 +12,66 @@ public:
     virtual ElementType GetFirst() const = 0;
     virtual ElementType GetLast() const = 0;
     virtual ElementType Get(int index) const = 0;
-    virtual Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) const = 0;
+    virtual Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex)  = 0;
     virtual int GetLength() const = 0;
 
     virtual Sequence<ElementType>* Append(ElementType item) = 0;
     virtual Sequence<ElementType>* Prepend(ElementType item) = 0;
     virtual Sequence<ElementType>* InsertAt(ElementType item, int index) = 0;
-    virtual Sequence<ElementType>* Concat(Sequence<ElementType>* other) const = 0;
+    virtual Sequence<ElementType>* Concat(const Sequence<ElementType>& other) = 0;
 
-    template<typename OtherType, typename ResultType>
-    Sequence<ResultType>* Zip(Sequence<OtherType>* other,
-        ResultType(*zipper)(ElementType, OtherType)) const 
+    template<typename OtherType, typename ResultType, typename ResultSequenceType>
+    ResultSequenceType Zip(Sequence<OtherType>* other,
+        ResultType(*zipper)(ElementType, OtherType)) const
     {
-        if (other == nullptr) 
-        {
+        if (other == nullptr) {
             throw std::invalid_argument("Other sequence cannot be null");
         }
-        if (zipper == nullptr) 
-        {
+        if (zipper == nullptr) {
             throw std::invalid_argument("Zipper function cannot be null");
         }
 
-        Sequence<ResultType>* result = CreateEmpty<ResultType>();
-        const int minLength = std::min(this->GetLength(), other->GetLength());
+        // Используем шаблонный CreateEmpty
+        ResultSequenceType result;
 
-        for (int i = 0; i < minLength; ++i) 
-        {
-            result->Append(zipper(this->Get(i), other->Get(i)));
+        const int minLength = std::min(this->GetLength(), other->GetLength());
+        for (int i = 0; i < minLength; ++i) {
+            result.Append(zipper(this->Get(i), other->Get(i)));
         }
         return result;
     }
 
-    template<typename T1, typename T2>
-    static std::pair<Sequence<T1>*, Sequence<T2>*> Unzip(Sequence<std::pair<T1, T2>>* zipped) {
-        if (zipped == nullptr) 
-        {
+    template<typename T1, typename T2, typename ResultSequenceType1, typename ResultSequenceType2>
+    static std::pair<ResultSequenceType1, ResultSequenceType2> Unzip(Sequence<std::pair<T1, T2>>* zipped) {
+        if (zipped == nullptr) {
             throw std::invalid_argument("Zipped sequence cannot be null");
         }
 
-        Sequence<T1>* firstSeq = Sequence<T1>::CreateEmpty();
-        Sequence<T2>* secondSeq = Sequence<T2>::CreateEmpty();
+        // Используем шаблонный CreateEmpty
+        ResultSequenceType1 firstSeq;
+        ResultSequenceType2 secondSeq;
 
-        for (int i = 0; i < zipped->GetLength(); ++i) 
-        {
+        for (int i = 0; i < zipped->GetLength(); ++i) {
             auto pair = zipped->Get(i);
-            firstSeq->Append(pair.first);
-            secondSeq->Append(pair.second);
+            firstSeq.Append(pair.first);
+            secondSeq.Append(pair.second);
         }
         return std::make_pair(firstSeq, secondSeq);
     }
 
-    Sequence<Sequence<ElementType>*>* Split(bool (*splitCondition)(ElementType)) const {
+    Sequence<Sequence<ElementType>*>* Split(bool (*splitCondition)(ElementType)) const
+    {
         if (splitCondition == nullptr)
         {
             throw std::invalid_argument("Split condition cannot be null");
         }
 
-        Sequence<Sequence<ElementType>*>* result = CreateEmpty<Sequence<ElementType>*>();
-        Sequence<ElementType>* currentChunk = CreateEmpty<ElementType>();
+        // Создаем результирующую последовательность последовательностей
+        Sequence<Sequence<ElementType>*>* result =
+            Sequence<Sequence<ElementType>*>::template CreateEmpty<Sequence<ElementType>*>();
+
+        // Создаем текущий чанк того же типа, что и исходная последовательность
+        Sequence<ElementType>* currentChunk = this->CreateEmpty();
 
         for (int i = 0; i < this->GetLength(); ++i)
         {
@@ -79,20 +81,21 @@ public:
                 if (currentChunk->GetLength() > 0)
                 {
                     result->Append(currentChunk);
-                    currentChunk = CreateEmpty<ElementType>();
+                    currentChunk = this->CreateEmpty();
                 }
             }
-            else 
+            else
             {
                 currentChunk->Append(item);
             }
         }
 
+        // Добавляем последний чанк, если он не пустой
         if (currentChunk->GetLength() > 0)
         {
             result->Append(currentChunk);
         }
-        else 
+        else
         {
             delete currentChunk;
         }
@@ -101,9 +104,7 @@ public:
     }
 
 protected:
-    template<typename T>
-    static Sequence<T>* CreateEmpty()
-    {
-        throw std::runtime_error("CreateEmpty not implemented");
-    }
+
+    virtual Sequence<ElementType>* CreateEmpty()  = 0;
+
 };

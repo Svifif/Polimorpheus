@@ -127,17 +127,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ASequence.hpp" />
+    <ClCompile Include="ASequence._hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="DynamicArray.hpp" />
     <ClCompile Include="DynamicArrayTests.cpp" />
-    <ClCompile Include="ILLSequence.cpp" />
-    <ClCompile Include="IMASequence.cpp" />
+    <ClCompile Include="ILLSequence._cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="IMASequence.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Laba2.cpp" />
     <ClCompile Include="LinkedList.hpp" />
     <ClCompile Include="LLSequence.hpp" />
-    <ClCompile Include="MLLSequence.cpp" />
+    <ClCompile Include="LLSequenceTests.cpp" />
+    <ClCompile Include="MLLSequence.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Sequence.hpp" />
-    <ClCompile Include="MASequence.cpp" />
+    <ClCompile Include="MASequence.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="TLinkedList.cpp" />
     <ClCompile Include="TLinkedList.hpp" />
     <ClCompile Include="TrackedObject.cpp" />
@@ -146,6 +157,7 @@
     <None Include="DynamicArrayTests.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LLSequenceTests.hpp" />
     <ClInclude Include="TrackedObject.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

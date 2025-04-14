@@ -27,7 +27,7 @@
     <ClCompile Include="Laba2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ILLSequence.cpp">
+    <ClCompile Include="ILLSequence._cpp">
       <Filter>Source Files\old</Filter>
     </ClCompile>
     <ClCompile Include="MLLSequence.cpp">
@@ -39,7 +39,7 @@
     <ClCompile Include="MASequence.cpp">
       <Filter>Source Files\old</Filter>
     </ClCompile>
-    <ClCompile Include="ASequence.hpp">
+    <ClCompile Include="ASequence._hpp">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="DynamicArray.hpp">
@@ -66,6 +66,9 @@
     <ClCompile Include="TrackedObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LLSequenceTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DynamicArrayTests.hpp">
@@ -74,6 +77,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TrackedObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LLSequenceTests.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

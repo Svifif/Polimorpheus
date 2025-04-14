@@ -13,3 +13,4 @@ void test_modifiers1();
 void test_concat();
 void test_sublist();
 void test_iterators();
+void run_linked_list_tests(void);

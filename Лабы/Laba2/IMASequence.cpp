@@ -1,5 +1,4 @@
-#include "Sequence.cpp"
-#include "DynamicArray.cpp"
+
 
 template<typename ElementType>
 class ImArraySequence : public Sequence<ElementType>

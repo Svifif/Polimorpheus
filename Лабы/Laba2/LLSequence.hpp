@@ -1,6 +1,6 @@
 #pragma once
 #include "Sequence.hpp"
-#include "LinckedList.hpp"
+#include "LinkedList.hpp"
 
 template<typename ElementType>
 class LLSequence : public Sequence<ElementType>
@@ -12,11 +12,12 @@ protected:
     {
     }
 
-    virtual Sequence<ElementType>* GetThis() = 0;
+    virtual LLSequence<ElementType>* GetThis() = 0;
+    //virtual const LLSequence<ElementType>* GetThis() const = 0;
 
 public:
     LLSequence() = default;
-
+    using Sequence<ElementType>::Zip;
     LLSequence(ElementType* items, int count)
     {
         if (count < 0)
@@ -82,7 +83,7 @@ public:
         {
             throw std::out_of_range("Index out of range");
         }
-        return list.get_data_ref(index);
+        return list.get_data(index);
     }
 
     const ElementType& operator[](int index) const
@@ -157,11 +158,19 @@ public:
         return result;
     }
 
-    Sequence<ElementType>* Append(ElementType&& item) override
+    // Универсальный Append
+    template<typename T>
+    Sequence<ElementType>* Append(T&& item)
     {
         auto* result = GetThis();
-        result->list.push_back(std::move(item));
+        result->list.push_back(std::forward<T>(item));
         return result;
+    }
+
+    // Специальная перегрузка для строковых литералов
+    Sequence<ElementType>* Append(const char* item)
+    {
+        return Append(std::string(item));
     }
 
     Sequence<ElementType>* Prepend(ElementType item) override
@@ -171,11 +180,19 @@ public:
         return result;
     }
 
-    Sequence<ElementType>* Prepend(ElementType&& item) override
+    // Универсальный Prepend
+    template<typename T>
+    Sequence<ElementType>* Prepend(T&& item)
     {
         auto* result = GetThis();
-        result->list.push_front(std::move(item));
+        result->list.push_front(std::forward<T>(item));
         return result;
+    }
+
+    // Специальная перегрузка для строковых литералов
+    Sequence<ElementType>* Prepend(const char* item)
+    {
+        return Prepend(std::string(item));
     }
 
     Sequence<ElementType>* InsertAt(ElementType item, int index) override
@@ -185,84 +202,65 @@ public:
             throw std::out_of_range("Index out of range");
         }
 
-        auto* result = GetThis();
+        auto result = GetThis();
         result->list.insert(index, item);
         return result;
     }
 
-    Sequence<ElementType>* InsertAt(ElementType&& item, int index) override
-    {
-        if (index < 0 || index > list.get_size())
-        {
-            throw std::out_of_range("Index out of range");
-        }
-
-        auto* result = GetThis();
-        result->list.insert(index, std::move(item));
-        return result;
-    }
-
-    Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) const override
+    Sequence<ElementType>* GetSubsequence(int startIndex, int endIndex) override 
     {
         if (startIndex < 0 || endIndex >= list.get_size() || startIndex > endIndex)
         {
             throw std::out_of_range("Invalid subsequence indices");
         }
 
-        auto subList = list.GetSubList(startIndex, endIndex);
-        return new LLSequence(std::move(subList));
-    }
+        // Получаем новый объект через GetThis() (для MLL - this, для ILL - копию)
+        auto result = this->CreateEmpty();
 
-    Sequence<ElementType>* Concat(Sequence<ElementType>* other) const override
-    {
-        if (!other)
+        // Заполняем подпоследовательностью
+        for (int i = startIndex; i <= endIndex; ++i) 
         {
-            throw std::invalid_argument("Other sequence cannot be null");
-        }
-        if (this == other)
-        {
-            throw std::invalid_argument("Cannot concatenate sequence with itself");
+            result->Append(list.get_data(i));
         }
 
-        auto* result = new LLSequence(*this);
-        for (int i = 0; i < other->GetLength(); ++i)
-        {
-            result->list.push_back(other->Get(i));
-        }
         return result;
     }
 
-    Sequence<ElementType>* Concat(Sequence<ElementType>&& other) override
+    LLSequence<ElementType>* Concat(const Sequence<ElementType>& other) override
     {
         if (this == &other)
         {
             throw std::invalid_argument("Cannot concatenate sequence with itself");
         }
 
-        if (auto* otherSeq = dynamic_cast<LLSequence*>(&other))
-        {
-            auto* result = GetThis();
-            result->list.concat(std::move(otherSeq->list));
-            return result;
-        }
-        throw std::invalid_argument("Incompatible sequence type for concatenation");
-    }
+        // Создаем новую последовательность через CreateEmpty()
+        LLSequence<ElementType>* result = GetThis();
 
-    template<typename ResultType>
-    Sequence<ResultType>* Map(ResultType(*mapper)(ElementType)) const
-    {
-        if (!mapper)
+        // Добавляем элементы из другой последовательности
+        for (int i = 0; i < other.GetLength(); ++i)
         {
-            throw std::invalid_argument("Mapper function cannot be null");
+            result->list.push_back(other.Get(i));
         }
 
-        auto* result = new LLSequence<ResultType>();
-        for (int i = 0; i < GetLength(); ++i)
-        {
-            result->Append(mapper(Get(i)));
-        }
         return result;
     }
+
+
+    //template<typename ResultType>
+    //LLSequence<ResultType> Map(ResultType(*mapper)(ElementType))
+    //{
+    //    if (!mapper)
+    //    {
+    //        throw std::invalid_argument("Mapper function cannot be null");
+    //    }
+
+    //    LLSequence<ResultType> result;
+    //    for (int i = 0; i < GetLength(); ++i)
+    //    {
+    //        result->Append(mapper(Get(i)));
+    //    }
+    //    return result;
+    //}
 
     template<typename ResultType>
     ResultType Reduce(ResultType(*reducer)(ResultType, ElementType), ResultType initial) const
@@ -280,14 +278,14 @@ public:
         return accumulator;
     }
 
-    Sequence<ElementType>* Where(bool (*predicate)(ElementType)) const
+    Sequence<ElementType>* Where(bool (*predicate)(ElementType)) 
     {
         if (!predicate)
         {
             throw std::invalid_argument("Predicate function cannot be null");
         }
 
-        auto* result = new LLSequence<ElementType>();
+        auto result = this->CreateEmpty();
         for (int i = 0; i < GetLength(); ++i)
         {
             ElementType current = Get(i);
@@ -298,19 +296,33 @@ public:
         }
         return result;
     }
+
+
+
 };
 
 template<typename ElementType>
 class MLLSequence : public LLSequence<ElementType>
 {
 protected:
-    Sequence<ElementType>* GetThis() override
+    LLSequence<ElementType>* GetThis() override
     {
-        return this;
+        return this; // Возвращает текущий объект
+    }
+    Sequence<ElementType>* CreateEmpty()  override
+    {
+        return new MLLSequence<ElementType>(); // Просто создаем новый объект
     }
 
+
 public:
-    using LLSequence<ElementType>::LLSequence;
+    MLLSequence(const MLLSequence& other) : LLSequence<ElementType>(other) {}
+    MLLSequence() : LLSequence<ElementType>() {} // Конструктор по умолчанию
+    // Явно определяем конструктор с параметрами
+    MLLSequence(ElementType* items, int count) : LLSequence<ElementType>(items, count) {}
+
+
+    using LLSequence<ElementType>::LLSequence; // Используем остальные конструкторы базового класса
 
     MLLSequence(MLLSequence&& other) noexcept = default;
 
@@ -324,19 +336,44 @@ public:
         }
         return *this;
     }
+
+    template<typename ResultType>
+    MLLSequence<ResultType> Map(ResultType(*mapper)(ElementType))
+    {
+        if (!mapper)
+        {
+            throw std::invalid_argument("Mapper function cannot be null");
+        }
+
+        MLLSequence<ResultType> result;
+        for (int i = 0; i < this->GetLength(); ++i)
+        {
+            result.Append(mapper(this->Get(i)));
+        }
+        return result;
+    }
 };
+
 
 template<typename ElementType>
 class ILLSequence : public LLSequence<ElementType>
 {
 protected:
-    Sequence<ElementType>* GetThis() override
+    LLSequence<ElementType>* GetThis() override
     {
         return new ILLSequence(*this);
     }
+    //const LLSequence<ElementType>* GetThis() const  { return new ILLSequence(*this); }
+    Sequence<ElementType>* CreateEmpty()  override
+    {
+        return new ILLSequence<ElementType>(); // Просто создаем новый объект
+    }
 
 public:
-    using LLSequence<ElementType>::LLSequence;
+    // Явно определяем конструктор с параметрами
+    ILLSequence(ElementType* items, int count) : LLSequence<ElementType>(items, count) {}
+
+    using LLSequence<ElementType>::LLSequence; // Используем остальные конструкторы базового класса
 
     ILLSequence(ILLSequence&& other) noexcept = default;
 
@@ -349,5 +386,21 @@ public:
             this->list = other.list;
         }
         return *this;
+    }
+
+    template<typename ResultType>
+    ILLSequence<ResultType> Map(ResultType(*mapper)(ElementType))
+    {
+        if (!mapper)
+        {
+            throw std::invalid_argument("Mapper function cannot be null");
+        }
+
+        ILLSequence<ResultType> result;
+        for (int i = 0; i < this->GetLength(); ++i)
+        {
+            result->Append(mapper(this->Get(i)));
+        }
+        return result;
     }
 };
