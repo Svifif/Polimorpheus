@@ -8,4 +8,5 @@
 /Лабы/x64/Debug
 *.user
 /Лабы/Laba1/.vs/Laba1
-/Лабы/Laba1/Debug/Laba1.Build.CppClean.log
+Debug/
+*.tlog

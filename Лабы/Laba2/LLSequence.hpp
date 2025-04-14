@@ -246,21 +246,21 @@ public:
     }
 
 
-    //template<typename ResultType>
-    //LLSequence<ResultType> Map(ResultType(*mapper)(ElementType))
-    //{
-    //    if (!mapper)
-    //    {
-    //        throw std::invalid_argument("Mapper function cannot be null");
-    //    }
+    template<typename ResultType, typename ResultSequenceType>
+    ResultSequenceType Map(ResultType(*mapper)(ElementType))
+    {
+        if (!mapper)
+        {
+            throw std::invalid_argument("Mapper function cannot be null");
+        }
 
-    //    LLSequence<ResultType> result;
-    //    for (int i = 0; i < GetLength(); ++i)
-    //    {
-    //        result->Append(mapper(Get(i)));
-    //    }
-    //    return result;
-    //}
+        ResultSequenceType result;
+        for (int i = 0; i < GetLength(); ++i)
+        {
+            result->Append(mapper(Get(i)));
+        }
+        return result;
+    }
 
     template<typename ResultType>
     ResultType Reduce(ResultType(*reducer)(ResultType, ElementType), ResultType initial) const
@@ -337,21 +337,7 @@ public:
         return *this;
     }
 
-    template<typename ResultType>
-    MLLSequence<ResultType> Map(ResultType(*mapper)(ElementType))
-    {
-        if (!mapper)
-        {
-            throw std::invalid_argument("Mapper function cannot be null");
-        }
 
-        MLLSequence<ResultType> result;
-        for (int i = 0; i < this->GetLength(); ++i)
-        {
-            result.Append(mapper(this->Get(i)));
-        }
-        return result;
-    }
 };
 
 
@@ -388,19 +374,4 @@ public:
         return *this;
     }
 
-    template<typename ResultType>
-    ILLSequence<ResultType> Map(ResultType(*mapper)(ElementType))
-    {
-        if (!mapper)
-        {
-            throw std::invalid_argument("Mapper function cannot be null");
-        }
-
-        ILLSequence<ResultType> result;
-        for (int i = 0; i < this->GetLength(); ++i)
-        {
-            result->Append(mapper(this->Get(i)));
-        }
-        return result;
-    }
 };
