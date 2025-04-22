@@ -15,7 +15,13 @@ protected:
 public:
     ArraySequence() = default;
 
-    ArraySequence(ElementType* items, int count) : array(items, count) {}
+    ArraySequence(ElementType* items, int count) : array(items, count) 
+    {
+        if (items == nullptr && count > 0)
+        {
+            throw std::invalid_argument("Items pointer is null but count is positive!");
+        }
+    }
 
     ArraySequence(const ArraySequence& other) : array(other.array) {}
 

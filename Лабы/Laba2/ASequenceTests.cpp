@@ -82,7 +82,6 @@ void SequenceTests::test_concat() {
     auto concat = seq1.Concat(seq2);
     assert(concat->GetLength() == 4);
     assert(concat->Get(3) == 4);
-    delete concat;
 
     // Self-concat test
     try {

@@ -8,7 +8,8 @@
 #include <string>
 //#include <utility>
 
-class SequenceTests {
+class SequenceTests 
+{
 public:
     static void test_constructors();
     static void test_accessors();

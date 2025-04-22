@@ -47,6 +47,11 @@ public:
     //O(n)
     DynamicArray(ElementType* items, size_t count) : capacity(count), size(count)
     {
+        if (items == nullptr)
+        {
+            throw std::invalid_argument("Items pointer is null!");
+        }
+
         if (capacity > 0)
         {
             data = new ElementType[capacity];

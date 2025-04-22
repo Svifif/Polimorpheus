@@ -1,5 +1,29 @@
-﻿  DynamicArrayTests.cpp
-x64\Debug\TLinkedList.obj : warning LNK4042: object specified more than once; extras ignored
+﻿  ASequenceTests.cpp
+C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(55,30): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'ASequenceTests.cpp')
+      C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(55,30):
+      the template instantiation context (the oldest one first) is
+          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequenceTests.cpp(160,23):
+          see reference to class template instantiation 'MArraySequence<double>' being compiled
+          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(180,31):
+          see reference to class template instantiation 'ArraySequence<ElementType>' being compiled
+          with
+          [
+              ElementType=double
+          ]
+          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(53,9):
+          while compiling class template member function 'int ArraySequence<ElementType>::GetLength(void) const'
+          with
+          [
+              ElementType=double
+          ]
+              C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequenceTests.cpp(161,5):
+              see the first reference to 'ArraySequence<ElementType>::GetLength' in 'SequenceTests::test_map_operation'
+          with
+          [
+              ElementType=double
+          ]
+  
   Laba2.vcxproj -> C:\Users\artem\source\repos\Polimorpheus\Лабы\x64\Debug\Laba2.exe
   "pwsh.exe" не является внутренней или внешней
   командой, исполняемой программой или пакетным файлом.
