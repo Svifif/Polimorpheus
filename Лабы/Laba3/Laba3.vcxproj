@@ -128,21 +128,36 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DequeTests.cpp" />
+    <ClCompile Include="DiagonalMatrixTests.cpp" />
     <ClCompile Include="Laba3.cpp" />
+    <ClCompile Include="MatrixTests.cpp" />
     <ClCompile Include="PriorityQueueTests.cpp" />
     <ClCompile Include="QueueTests.cpp" />
+    <ClCompile Include="SquareMatrixTests.cpp" />
     <ClCompile Include="StackTests.cpp" />
+    <ClCompile Include="VectorTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Deque.hpp" />
     <ClInclude Include="DequeTests.hpp" />
+    <ClInclude Include="DiagonalMatrix.h" />
+    <ClInclude Include="DiagonalMatrixTests.hpp" />
     <ClInclude Include="DynamicArray.hpp" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="MatrixTests.hpp" />
     <ClInclude Include="PriorityQueue.hpp" />
     <ClInclude Include="PriorityQueueTests.hpp" />
     <ClInclude Include="Queue.hpp" />
     <ClInclude Include="QueueTests.hpp" />
+    <ClInclude Include="SquareMatrix.h" />
+    <ClInclude Include="SquareMatrixTests.hpp" />
     <ClInclude Include="Stack.hpp" />
     <ClInclude Include="StackTests.hpp" />
+    <ClInclude Include="Vector.h" />
+    <ClInclude Include="VectorTests.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="работает.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
