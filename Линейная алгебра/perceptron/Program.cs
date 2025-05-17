@@ -23,11 +23,7 @@ class Perceptron
 
     private double Sigmoid(double z)
     {
-        // Стабильная реализация сигмоиды
-        if (z >= 0)
-            return 1.0 / (1.0 + Math.Exp(-z));
-        else
-            return Math.Exp(z) / (1.0 + Math.Exp(z));
+        return 1.0 / (1.0 + Math.Exp(-z));
     }
 
     public double[] Predict(double[][] inputs)
