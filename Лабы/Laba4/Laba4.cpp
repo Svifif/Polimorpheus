@@ -1,11 +1,10 @@
-﻿// Laba4.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+﻿#include "AVLTreeTests.hpp"
 
 #include <iostream>
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	AVLTreeTests::runAllTests();
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

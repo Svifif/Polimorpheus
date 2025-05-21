@@ -127,7 +127,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AVLTreeTests.cpp" />
     <ClCompile Include="Laba4.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AVLTree.h" />
+    <ClInclude Include="AVLTreeTests.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Работает.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

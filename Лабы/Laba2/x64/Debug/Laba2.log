@@ -1,29 +1,65 @@
-﻿  ASequenceTests.cpp
-C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(55,30): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+﻿  ASequence.hpp
+  ASequenceTests.cpp
+C:\Users\admin\Documents\учёба\Лабы\Laba2\ASequence.hpp(55,30): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
   (compiling source file 'ASequenceTests.cpp')
-      C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(55,30):
+      C:\Users\admin\Documents\учёба\Лабы\Laba2\ASequence.hpp(55,30):
       the template instantiation context (the oldest one first) is
-          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequenceTests.cpp(160,23):
+          C:\Users\admin\Documents\учёба\Лабы\Laba2\ASequenceTests.cpp(160,23):
           see reference to class template instantiation 'MArraySequence<double>' being compiled
-          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(180,31):
+          C:\Users\admin\Documents\учёба\Лабы\Laba2\ASequence.hpp(180,31):
           see reference to class template instantiation 'ArraySequence<ElementType>' being compiled
           with
           [
               ElementType=double
           ]
-          C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequence.hpp(53,9):
+          C:\Users\admin\Documents\учёба\Лабы\Laba2\ASequence.hpp(53,9):
           while compiling class template member function 'int ArraySequence<ElementType>::GetLength(void) const'
           with
           [
               ElementType=double
           ]
-              C:\Users\artem\source\repos\Polimorpheus\Лабы\Laba2\ASequenceTests.cpp(161,5):
+              C:\Users\admin\Documents\учёба\Лабы\Laba2\ASequenceTests.cpp(161,5):
               see the first reference to 'ArraySequence<ElementType>::GetLength' in 'SequenceTests::test_map_operation'
           with
           [
               ElementType=double
           ]
   
-  Laba2.vcxproj -> C:\Users\artem\source\repos\Polimorpheus\Лабы\x64\Debug\Laba2.exe
-  "pwsh.exe" не является внутренней или внешней
-  командой, исполняемой программой или пакетным файлом.
+  DynamicArray.hpp
+  DynamicArrayTests.cpp
+  Laba2.cpp
+  LinkedList.hpp
+  LLSequence.hpp
+  LLSequenceTests.cpp
+C:\Users\admin\Documents\учёба\Лабы\Laba2\LLSequence.hpp(77,29): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file 'LLSequenceTests.cpp')
+      C:\Users\admin\Documents\учёба\Лабы\Laba2\LLSequence.hpp(77,29):
+      the template instantiation context (the oldest one first) is
+          C:\Users\admin\Documents\учёба\Лабы\Laba2\LLSequenceTests.cpp(189,23):
+          see reference to class template instantiation 'MLLSequence<double>' being compiled
+          C:\Users\admin\Documents\учёба\Лабы\Laba2\LLSequence.hpp(223,28):
+          see reference to class template instantiation 'LLSequence<ElementType>' being compiled
+          with
+          [
+              ElementType=double
+          ]
+          C:\Users\admin\Documents\учёба\Лабы\Laba2\LLSequence.hpp(75,9):
+          while compiling class template member function 'int LLSequence<ElementType>::GetLength(void) const'
+          with
+          [
+              ElementType=double
+          ]
+              C:\Users\admin\Documents\учёба\Лабы\Laba2\LLSequenceTests.cpp(190,5):
+              see the first reference to 'LLSequence<ElementType>::GetLength' in 'test_llseq_map_operation'
+          with
+          [
+              ElementType=double
+          ]
+  
+  Sequence.hpp
+  TLinkedList.cpp
+  TLinkedList.hpp
+  TrackedObject.cpp
+  Generating Code...
+x64\Debug\TLinkedList.obj : warning LNK4042: object specified more than once; extras ignored
+  Laba2.vcxproj -> C:\Users\admin\Documents\учёба\Лабы\x64\Debug\Laba2.exe
