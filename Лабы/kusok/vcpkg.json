@@ -1,0 +1,7 @@
+{
+    "name": "lab-project",
+    "version": "1.0.0",
+    "dependencies": [
+      "glfw3"
+    ]
+  }

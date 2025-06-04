@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Qwant")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f4284352decfd9bac50b54fa8118ec34f730646")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7149a5828abdb52717ee3ea94cd36303fef88609")]
 [assembly: System.Reflection.AssemblyProductAttribute("Qwant")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Qwant")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
