@@ -11,9 +11,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Laba3", "Laba3\Laba3.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Laba4", "Laba4\Laba4.vcxproj", "{19D9D032-2881-420A-9BA8-D8A9AA87D085}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kusok", "kusok\kusok.vcxproj", "{00341128-6C29-4DFC-AE11-951C10CA92D0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kusok_old", "kusok\kusok.vcxproj", "{00341128-6C29-4DFC-AE11-951C10CA92D0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "graf", "kusok\graf.vcxproj", "{7CDD654C-48DC-3A5C-828A-129DBF3CE3A2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "meloch", "meloch\meloch.vcxproj", "{48C4740E-D539-4E7E-9FA1-F9FAD981935C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,14 @@ Global
 		{7CDD654C-48DC-3A5C-828A-129DBF3CE3A2}.Release|x64.Build.0 = Release|x64
 		{7CDD654C-48DC-3A5C-828A-129DBF3CE3A2}.Release|x86.ActiveCfg = Release|x64
 		{7CDD654C-48DC-3A5C-828A-129DBF3CE3A2}.Release|x86.Build.0 = Release|x64
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Debug|x64.ActiveCfg = Debug|x64
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Debug|x64.Build.0 = Debug|x64
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Debug|x86.ActiveCfg = Debug|Win32
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Debug|x86.Build.0 = Debug|Win32
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Release|x64.ActiveCfg = Release|x64
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Release|x64.Build.0 = Release|x64
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Release|x86.ActiveCfg = Release|Win32
+		{48C4740E-D539-4E7E-9FA1-F9FAD981935C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

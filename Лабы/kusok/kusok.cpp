@@ -14,7 +14,8 @@
 using namespace std;
 
 using MathFunc = function<double(double, const vector<double>&)>;
-struct FunctionSegment {
+struct FunctionSegment 
+{
     string name;
     MathFunc func;
     vector<double> coefficients;
@@ -23,10 +24,13 @@ struct FunctionSegment {
     vector<FunctionSegment> operands;
 };
 
-map<string, MathFunc> predefinedFuncs = {
-    {"poly", [](double x, const vector<double>& coefs) {
+map<string, MathFunc> predefinedFuncs = 
+{
+    {"poly", [](double x, const vector<double>& coefs) 
+    {
         double result = 0;
-        for (size_t i = 0; i < coefs.size(); ++i) {
+        for (size_t i = 0; i < coefs.size(); ++i)
+        {
             result += coefs[i] * pow(x, coefs.size() - 1 - i);
         }
         return result;
@@ -43,17 +47,20 @@ map<string, MathFunc> predefinedFuncs = {
 
 vector<FunctionSegment> userFunctions;
 
-vector<double> parseCoefficients(const string& coefStr) {
+vector<double> parseCoefficients(const string& coefStr) 
+{
     vector<double> coefs;
     stringstream ss(coefStr);
     string token;
-    while (getline(ss, token, ';')) {
+    while (getline(ss, token, ';')) 
+    {
         coefs.push_back(stod(token));
     }
     return coefs;
 }
 
-pair<double, double> parseInterval(const string& intervalStr) {
+pair<double, double> parseInterval(const string& intervalStr) 
+{
     string cleanStr = intervalStr.substr(1, intervalStr.size() - 2);
     size_t delimPos = cleanStr.find(';');
     double a = stod(cleanStr.substr(0, delimPos));
@@ -61,12 +68,15 @@ pair<double, double> parseInterval(const string& intervalStr) {
     return make_pair(a, b);
 }
 
-double evaluateFunction(const FunctionSegment& func, double x) {
-    if (x < func.interval.first || x > func.interval.second) {
+double evaluateFunction(const FunctionSegment& func, double x) 
+{
+    if (x < func.interval.first || x > func.interval.second)
+    {
         return NAN;
     }
 
-    if (func.operation.empty()) {
+    if (func.operation.empty()) 
+    {
         // Проверка особых случаев для базовых функций
         if (func.name == "log" && func.coefficients[1] * x <= 0) return NAN;
         if (func.name == "sqrt" && func.coefficients[1] * x < 0) return NAN;
@@ -74,36 +84,42 @@ double evaluateFunction(const FunctionSegment& func, double x) {
 
         return func.func(x, func.coefficients);
     }
-    else {
+    else 
+    {
         vector<double> values;
-        for (const auto& op : func.operands) {
+        for (const auto& op : func.operands) 
+        {
             double val = evaluateFunction(op, x);
             if (!isnan(val)) values.push_back(val);
         }
 
         if (values.empty()) return NAN;
 
-        if (func.operation == "+") {
+        if (func.operation == "+")
+        {
             double sum = 0;
             for (double v : values) sum += v;
             return sum;
         }
-        else if (func.operation == "*") {
+        else if (func.operation == "*") 
+        {
             double prod = 1;
             for (double v : values) prod *= v;
             return isfinite(prod) ? prod : NAN;
         }
-        else if (func.operation == "/") {
+        else if (func.operation == "/") 
+        {
             if (values.size() != 2 || values[1] == 0) return NAN;
             double res = values[0] / values[1];
             return isfinite(res) ? res : NAN;
         }
-        else if (func.operation == "&") {
+        else if (func.operation == "&") 
+        {
             if (values.size() != 2) return NAN;
             double gx = values[1];
             // Проверяем, что gx попадает в интервал первой функции
-            if (gx < func.operands[0].interval.first ||
-                gx > func.operands[0].interval.second) {
+            if (gx < func.operands[0].interval.first ||gx > func.operands[0].interval.second) 
+            {
                 return NAN;
             }
             return evaluateFunction(func.operands[0], gx);
@@ -112,22 +128,27 @@ double evaluateFunction(const FunctionSegment& func, double x) {
     }
 }
 
-void printFunctionList() {
-    if (userFunctions.empty()) {
+void printFunctionList() 
+{
+    if (userFunctions.empty()) 
+    {
         cout << "Нет добавленных функций.\n";
         return;
     }
 
     cout << "Текущие функции:\n";
-    for (size_t i = 0; i < userFunctions.size(); ++i) {
+    for (size_t i = 0; i < userFunctions.size(); ++i) 
+    {
         cout << i << ": " << userFunctions[i].name << " ";
-        for (double coef : userFunctions[i].coefficients) {
+        for (double coef : userFunctions[i].coefficients) 
+        {
             cout << coef << ";";
         }
         cout << " [" << userFunctions[i].interval.first << ";"
             << userFunctions[i].interval.second << "]";
 
-        if (!userFunctions[i].operation.empty()) {
+        if (!userFunctions[i].operation.empty()) 
+        {
             cout << " " << userFunctions[i].operation << " "
                 << userFunctions[i].operands[1].name;
         }
@@ -135,12 +156,15 @@ void printFunctionList() {
     }
 }
 
-void addPredefinedFunction() {
+void addPredefinedFunction() 
+{
     cout << "Доступные функции:\n";
     cout << "  poly c0;c1;...;cn - многочлен c0*x^n + c1*x^(n-1) + ... + cn\n";
     cout << "  inv c0;c1 - обратная функция c0/(x + c1)\n";
-    for (const auto& func : predefinedFuncs) {
-        if (func.first != "poly" && func.first != "inv") {
+    for (const auto& func : predefinedFuncs)
+    {
+        if (func.first != "poly" && func.first != "inv")
+        {
             cout << "  " << func.first << " c0;c1 - " << func.first << "(c1*x)*c0\n";
         }
     }
@@ -160,53 +184,38 @@ void addPredefinedFunction() {
     string token;
     while (ss >> token) tokens.push_back(token);
 
-    if (tokens.size() < 3 || tokens.size() > 7) {
+    if (tokens.size() < 3 || tokens.size() > 7) 
+    {
         cerr << "Неверный формат ввода!\n";
         return;
     }
 
     FunctionSegment newFunc;
 
-    if (tokens.size() == 3) {
-        if (predefinedFuncs.find(tokens[0]) == predefinedFuncs.end()) {
+    if (tokens.size() == 3) 
+    {
+        if (predefinedFuncs.find(tokens[0]) == predefinedFuncs.end()) 
+        {
             cerr << "Функция " << tokens[0] << " не найдена!\n";
             return;
         }
 
-        newFunc = {
-            tokens[0],
-            predefinedFuncs[tokens[0]],
-            parseCoefficients(tokens[1]),
-            parseInterval(tokens[2])
-        };
+        newFunc = {tokens[0],predefinedFuncs[tokens[0]],parseCoefficients(tokens[1]),parseInterval(tokens[2])};
     }
     else {
-        if (tokens.size() != 7 ||
-            (tokens[3] != "+" && tokens[3] != "*" && tokens[3] != "/" && tokens[3] != "&")) {
+        if (tokens.size() != 7 ||(tokens[3] != "+" && tokens[3] != "*" && tokens[3] != "/" && tokens[3] != "&")) 
+        {
             cerr << "Неверный формат составной функции!\n";
             return;
         }
 
-        FunctionSegment f1 = {
-            tokens[0],
-            predefinedFuncs[tokens[0]],
-            parseCoefficients(tokens[1]),
-            parseInterval(tokens[2])
-        };
+        FunctionSegment f1 = {tokens[0],predefinedFuncs[tokens[0]],parseCoefficients(tokens[1]),parseInterval(tokens[2])};
 
-        FunctionSegment f2 = {
-            tokens[4],
-            predefinedFuncs[tokens[4]],
-            parseCoefficients(tokens[5]),
-            parseInterval(tokens[6])
-        };
+        FunctionSegment f2 = {tokens[4],predefinedFuncs[tokens[4]],parseCoefficients(tokens[5]),parseInterval(tokens[6])};
 
         newFunc.operation = tokens[3];
         newFunc.operands = { f1, f2 };
-        newFunc.interval = {
-            max(f1.interval.first, f2.interval.first),
-            min(f1.interval.second, f2.interval.second)
-        };
+        newFunc.interval = {max(f1.interval.first, f2.interval.first),min(f1.interval.second, f2.interval.second)};
     }
 
     userFunctions.push_back(newFunc);
@@ -214,7 +223,8 @@ void addPredefinedFunction() {
     printFunctionList();
 }
 
-void renderPlot(GLFWwindow* window) {
+void renderPlot(GLFWwindow* window)
+{
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
@@ -222,7 +232,8 @@ void renderPlot(GLFWwindow* window) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    if (userFunctions.empty()) {
+    if (userFunctions.empty()) 
+    {
         glOrtho(-1, 1, -1, 1, -1, 1);
         return;
     }
@@ -283,7 +294,8 @@ void renderPlot(GLFWwindow* window) {
         {1,0,0}, {0,1,0}, {0,0,1}, {1,1,0}, {1,0,1}, {0,1,1}
     };
 
-    for (size_t i = 0; i < userFunctions.size(); ++i) {
+    for (size_t i = 0; i < userFunctions.size(); ++i)
+    {
         const auto& func = userFunctions[i];
         glColor3fv(colors[i % colors.size()].data());
 
@@ -293,32 +305,40 @@ void renderPlot(GLFWwindow* window) {
         bool drawing = false;
         glBegin(GL_LINES);
 
-        for (double x = func.interval.first; x <= func.interval.second; x += step) {
+        for (double x = func.interval.first; x <= func.interval.second; x += step)
+        {
             double y = evaluateFunction(func, x);
 
-            if (isfinite(y)) {
-                if (!drawing) {
+            if (isfinite(y))
+            {
+                if (!drawing)
+                {
                     glEnd();
                     glBegin(GL_LINE_STRIP);
                     drawing = true;
                 }
                 glVertex2f(x, y);
             }
-            else {
-                if (drawing) {
+            else 
+            {
+                if (drawing)
+                {
                     glEnd();
                     drawing = false;
                 }
             }
         }
 
-        if (drawing) {
+        if (drawing) 
+        {
             glEnd();
         }
     }
 }
-void removeFunction() {
-    if (userFunctions.empty()) {
+void removeFunction() 
+{
+    if (userFunctions.empty()) 
+    {
         cout << "Нет функций для удаления!\n";
         return;
     }
@@ -329,12 +349,14 @@ void removeFunction() {
     int index;
     cin >> index;
 
-    if (index == -1) {
+    if (index == -1) 
+    {
         cout << "Отмена удаления.\n";
         return;
     }
 
-    if (index < 0 || index >= (int)userFunctions.size()) {
+    if (index < 0 || index >= (int)userFunctions.size()) 
+    {
         cerr << "Неверный индекс!\n";
         return;
     }
@@ -357,7 +379,8 @@ int main() {
     }
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "График функций", NULL, NULL);
-    if (!window) {
+    if (!window) 
+    {
         glfwTerminate();
         return -1;
     }
@@ -365,7 +388,8 @@ int main() {
     glfwMakeContextCurrent(window);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glfwPollEvents();
         renderPlot(window);
         glfwSwapBuffers(window);
@@ -380,16 +404,20 @@ int main() {
         int choice;
         cin >> choice;
 
-        if (choice == 1) {
+        if (choice == 1)
+        {
             addPredefinedFunction();
         }
-        else if (choice == 2) {
+        else if (choice == 2) 
+        {
             double x;
             cout << "Введите x: ";
             cin >> x;
-            for (size_t i = 0; i < userFunctions.size(); ++i) {
+            for (size_t i = 0; i < userFunctions.size(); ++i)
+            {
                 double result = evaluateFunction(userFunctions[i], x);
-                if (!isnan(result)) {
+                if (!isnan(result)) 
+                {
                     cout << "f" << i << "(" << x << ") = " << result << "\n";
                 }
                 else {
@@ -397,16 +425,20 @@ int main() {
                 }
             }
         }
-        else if (choice == 3) {
+        else if (choice == 3)
+        {
             removeFunction();
         }
-        else if (choice == 4) {
+        else if (choice == 4) 
+        {
             clearAllFunctions();
         }
-        else if (choice == 5) {
+        else if (choice == 5) 
+        {
             printFunctionList();
         }
-        else if (choice == 6) {
+        else if (choice == 6)
+        {
             break;
         }
     }

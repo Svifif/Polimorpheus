@@ -17,9 +17,9 @@ template<typename ElementType> //В определениях шаблонов typename предоставляетс
 class DynamicArray
 {
 private:
-    ElementType* data = nullptr;
-    size_t capacity = 0;
-    size_t size = 0;
+    ElementType* data=nullptr;
+    size_t capacity=0;
+    size_t size=0;
     //O(n)
     void resize(size_t new_capacity) // Исправлено написание
     {
@@ -64,12 +64,12 @@ public:
 
     //конструктор копирования
     //O(n)
-    DynamicArray(const DynamicArray& other) : capacity(other.capacity), size(other.size)
+    DynamicArray(const DynamicArray& other): capacity(other.capacity), size(other.size)
     {
-        if (capacity > 0)
+        if (capacity > 0) 
         {
             data = new ElementType[capacity];
-            for (size_t i = 0; i < size; ++i)
+            for (size_t i = 0; i < size; ++i) 
             {
                 data[i] = other.data[i];
             }
@@ -77,7 +77,7 @@ public:
     }
     // move конструктор
     // O(1)
-    DynamicArray(DynamicArray&& other) noexcept : data(other.data), capacity(other.capacity), size(other.size)
+    DynamicArray(DynamicArray&& other) noexcept: data(other.data), capacity(other.capacity), size(other.size)
     {
         other.data = nullptr;
         other.capacity = 0;
@@ -86,11 +86,11 @@ public:
 
     // операторы
     // O(n)
-    DynamicArray& operator=(const DynamicArray& array1)
+    DynamicArray& operator=(const DynamicArray&array1) 
     {
         if (this != &array1)
         {
-            DynamicArray temp(array1);
+            DynamicArray temp (array1);
             swap(temp);
         }
         return *this;
@@ -115,16 +115,12 @@ public:
 
         return *this;
     }
-    // O(1)
-    ElementType& operator[](size_t index) const
-    {
-        return get(index);
-    }
+   
     //методы 1 ая обычная 2-ая для r-value
     // O(1), в худшем случае O(n) 
     void push_back(const ElementType& value)
     {
-        if (size >= capacity)
+        if (size >= capacity) 
         {
             resize(capacity == 0 ? 1 : capacity * 2);// учесть что 0...
         }
@@ -160,13 +156,42 @@ public:
         data[index] = std::move(object);
     }
     // O(1)
-    ElementType& get(size_t index) const
+
+// Неконстантные версии
+    ElementType& operator[](size_t index)
+    {
+        return get(index);
+    }
+
+    ElementType& get(size_t index) 
+    {
+        if (index >= size) throw std::out_of_range("List index out of range");
+        return data[index];
+    }
+
+    // Константные версии 
+    const ElementType& operator[](size_t index) const 
+    {
+        return get(index);
+    }
+
+    const ElementType& get(size_t index) const 
+    {
+        if (index >= size) throw std::out_of_range("List index out of range");
+        return data[index];
+    }
+    void remove(size_t index)
     {
         if (index >= size)
         {
-            throw std::out_of_range("List index out of range");
+            throw std::out_of_range("Index out of range");
         }
-        return data[index];
+
+        for (size_t i = index; i < size - 1; ++i)
+        {
+            data[i] = std::move(data[i + 1]);
+        }
+        --size;
     }
     // O(1)
     void swap(DynamicArray& other) noexcept
@@ -177,17 +202,17 @@ public:
     }
     // O(n)
     size_t get_size() const noexcept
-    {
+    { 
         return size;
     }
     size_t get_capacity() const noexcept
-    {
-        return capacity;
+    { 
+        return capacity; 
     }
-    // O(n)
+// O(n)
     void insert(const ElementType& value, size_t index)
     {
-        if (index > size)
+        if (index > size) 
         {  // Можно вставить после последнего элемента (index == size)
             throw std::out_of_range("Index out of range");
         }
@@ -209,7 +234,7 @@ public:
     }
 
     // Версия для r-value ссылок
-    void insert(ElementType&& value, size_t index)
+    void insert(ElementType&& value, size_t index) 
     {
         if (index > size)
         {
@@ -229,19 +254,6 @@ public:
         data[index] = std::move(value);
         ++size;
     }
-
-    // O(1)
-    ElementType pop_back() 
-    {
-        if (size == 0) 
-        {
-            throw std::out_of_range("Array is empty");
-        }
-        ElementType value = std::move(data[size - 1]);
-        --size;
-        return value;
-    }
-
     ~DynamicArray() /*capacity  и size удаляются автоматически*/
     {
         delete[] data;
