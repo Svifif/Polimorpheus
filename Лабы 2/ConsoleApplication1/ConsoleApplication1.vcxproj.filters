@@ -44,5 +44,11 @@
     <ClInclude Include="CardinalTests.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SmartPointer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SmartPointerTests.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

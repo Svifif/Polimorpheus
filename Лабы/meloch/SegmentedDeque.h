@@ -10,19 +10,19 @@ private:
     LinkedList<DynamicArray<T>> segments;
 
 public:
-    // 1. Добавление нового пустого сегмента
+    /// 1. Добавление нового пустого сегмента
     void add_segment()
     {
         segments.push_back(DynamicArray<T>());
     }
 
-    // 2. Добавление готового DynamicArray как сегмента
+    /// 2. Добавление готового DynamicArray как сегмента
     void add_segment(DynamicArray<T>&& ready_segment)
     {
         segments.push_back(std::move(ready_segment));
     }
 
-    // 3. Удаление сегмента по индексу
+    /// 3. Удаление сегмента по индексу
     void remove_segment(size_t segment_index)
     {
         if (segment_index >= segments.get_size())
@@ -32,7 +32,7 @@ public:
         segments.pop(segment_index);
     }
 
-    // 4. Доступ к сегменту по индексу
+    /// 4. Доступ к сегменту по индексу
     DynamicArray<T>& get_segment(size_t segment_index)
     {
         if (segment_index >= segments.get_size())
@@ -42,7 +42,7 @@ public:
         return segments[segment_index];
     }
 
-    // 5. Вставка элемента в конкретную позицию
+    /// 5. Вставка элемента в конкретную позицию
     void insert_element(size_t segment_index, size_t element_index, const T& value)
     {
         DynamicArray<T>& segment = get_segment(segment_index);
@@ -53,7 +53,7 @@ public:
         segment.insert(value, element_index);
     }
 
-    // 6. Получение элемента по индексам
+    /// 6. Получение элемента по индексам
     T& get_element(size_t segment_index, size_t element_index)
     {
         DynamicArray<T>& segment = get_segment(segment_index);
@@ -64,7 +64,7 @@ public:
         return segment[element_index];
     }
 
-    // 7. Удаление элемента по индексам
+    /// 7. Удаление элемента по индексам
     void remove_element(size_t segment_index, size_t element_index)
     {
         DynamicArray<T>& segment = get_segment(segment_index);
@@ -75,13 +75,13 @@ public:
         segment.remove(element_index);
     }
 
-    // 8. Общее количество сегментов
+    /// 8. Общее количество сегментов
     size_t segments_count() const
     {
         return segments.get_size();
     }
 
-    // 9. Размер конкретного сегмента
+    /// 9. Размер конкретного сегмента
     size_t segment_size(size_t segment_index) const
     {
         if (segment_index >= segments.get_size())
@@ -91,13 +91,13 @@ public:
         return segments[segment_index].get_size();
     }
 
-    // 10. Очистка всего дека
+    /// 10. Очистка всего дека
     void clear()
     {
         segments.clear();
     }
 
-    // 11. Обмен двух сегментов местами
+    /// 11. Обмен двух сегментов местами
     void swap_segments(size_t seg1, size_t seg2)
     {
         if (seg1 >= segments.get_size() || seg2 >= segments.get_size())
@@ -107,7 +107,7 @@ public:
         segments[seg1].swap(segments[seg2]);
     }
 
-    // 12. Проверка на пустоту (все сегменты пусты)
+    /// 12. Проверка на пустоту (все сегменты пусты)
     bool is_empty() const
     {
         for (size_t i = 0; i < segments.get_size(); ++i)

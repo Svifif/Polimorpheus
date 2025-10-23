@@ -1,7 +1,8 @@
 #include "ASequenceTests.hpp"
 using namespace std;
 
-void SequenceTests::test_constructors() {
+void SequenceTests::test_constructors()
+{
     // Test default constructor
     MArraySequence<int> seq1;
     assert(seq1.GetLength() == 0);
@@ -13,7 +14,8 @@ void SequenceTests::test_constructors() {
     assert(seq2[0] == 1);
 
     // Test invalid arguments
-    try {
+    try 
+    {
         MArraySequence<int> seq3(nullptr, 3);
         assert(false);
     }
@@ -26,7 +28,8 @@ void SequenceTests::test_constructors() {
     assert(seq4.GetLength() == 0);
 }
 
-void SequenceTests::test_accessors() {
+void SequenceTests::test_accessors() 
+{
     MArraySequence<std::string> seq;
     seq.Append("first");
     seq.Append("second");
@@ -40,14 +43,16 @@ void SequenceTests::test_accessors() {
 
     // Test empty sequence access
     MArraySequence<int> empty;
-    try {
+    try 
+    {
         empty.GetFirst();
         assert(false);
     }
     catch (const std::out_of_range&) {}
 }
 
-void SequenceTests::test_mutation() {
+void SequenceTests::test_mutation() 
+{
     MArraySequence<int> seq;
     seq.Append(1);
     seq.Prepend(0);
@@ -66,14 +71,16 @@ void SequenceTests::test_mutation() {
     delete sub;
 
     // Exception test
-    try {
+    try 
+    {
         seq.InsertAt(99, 999);
         assert(false);
     }
     catch (const std::out_of_range&) {}
 }
 
-void SequenceTests::test_concat() {
+void SequenceTests::test_concat() 
+{
     int items1[] = { 1, 2 };
     int items2[] = { 3, 4 };
     MArraySequence<int> seq1(items1, 2);
@@ -84,36 +91,43 @@ void SequenceTests::test_concat() {
     assert(concat->Get(3) == 4);
 
     // Self-concat test
-    try {
+    try
+    {
         seq1.Concat(seq1);
         assert(false);
     }
     catch (const std::invalid_argument&) {}
 }
 
-void SequenceTests::test_exceptions() {
+void SequenceTests::test_exceptions()
+{
     MArraySequence<int> seq;
     bool caught = false;
 
-    try {
+    try
+    {
         seq.GetFirst();
     }
-    catch (const std::out_of_range&) {
+    catch (const std::out_of_range&)
+    {
         caught = true;
     }
     assert(caught);
 
     caught = false;
-    try {
+    try 
+    {
         seq[0];
     }
-    catch (const std::out_of_range&) {
+    catch (const std::out_of_range&)
+    {
         caught = true;
     }
     assert(caught);
 }
 
-void SequenceTests::test_move_semantics() {
+void SequenceTests::test_move_semantics()
+{
     TrackedObject::counter = 0;
     {
         MArraySequence<TrackedObject> seq1;
@@ -127,7 +141,8 @@ void SequenceTests::test_move_semantics() {
     assert(TrackedObject::counter == 0);
 }
 
-void SequenceTests::test_where_operation() {
+void SequenceTests::test_where_operation() 
+{
     int items[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     MArraySequence<int> seq(items, 10);
 
@@ -137,12 +152,9 @@ void SequenceTests::test_where_operation() {
     delete filtered;
 }
 
-void SequenceTests::test_with_pairs() {
-    std::pair<int, std::string> items[] = { 
-        {1, "one"}, 
-        {2, "two"}, 
-        {3, "three"} 
-    };
+void SequenceTests::test_with_pairs() 
+{
+    std::pair<int, std::string> items[] ={ {1, "one"}, {2, "two"}, {3, "three"} };
     MArraySequence<std::pair<int, std::string>> seq(items, 3);
 
     assert(seq.GetLength() == 3);
@@ -153,7 +165,8 @@ void SequenceTests::test_with_pairs() {
     assert(seq.GetLength() == 4);
 }
 
-void SequenceTests::test_map_operation() {
+void SequenceTests::test_map_operation() 
+{
     int items[] = { 1, 2, 3 };
     MArraySequence<int> seq(items, 3);
 
@@ -162,14 +175,16 @@ void SequenceTests::test_map_operation() {
     assert(mapped.Get(1) == 3.0);
 }
 
-void SequenceTests::test_zip_operation() {
+void SequenceTests::test_zip_operation() 
+{
     int int_items[] = { 1, 2, 3 };
     std::string str_items[] = { "one", "two", "three" };
 
     MArraySequence<int> int_seq(int_items, 3);
     MArraySequence<std::string> str_seq(str_items, 3);
 
-    auto zipper = [](int num, std::string str) {
+    auto zipper = [](int num, std::string str)
+        {
         return std::to_string(num) + ": " + str;
         };
 
@@ -178,7 +193,8 @@ void SequenceTests::test_zip_operation() {
     assert(zipped.Get(0) == "1: one");
 }
 
-void SequenceTests::test_unzip_operation() {
+void SequenceTests::test_unzip_operation() 
+{
     std::pair<int, string> items[] = { {1, "one"}, {2, "two"} };
     MArraySequence<pair<int, string>> zipped(items, 2);
 
@@ -190,7 +206,8 @@ void SequenceTests::test_unzip_operation() {
     assert(unzipped.second.Get(0) == "one");
 }
 
-void SequenceTests::test_destructor() {
+void SequenceTests::test_destructor()
+{
     TrackedObject::counter = 0;
     {
         MArraySequence<TrackedObject> seq;
@@ -201,7 +218,8 @@ void SequenceTests::test_destructor() {
     assert(TrackedObject::counter == 0);
 }
 
-void SequenceTests::test_all() {
+void SequenceTests::test_all() 
+{
     test_constructors();
     test_accessors();
     test_mutation();

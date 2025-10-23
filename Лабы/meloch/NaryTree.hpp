@@ -13,8 +13,7 @@ private:
         T data;
         DynamicArray<Node*> children;
 
-        Node(const T& value, size_t arity)
-            : data(value), children(arity)
+        Node(const T& value, size_t arity): data(value), children(arity)
         {
             if (arity == 0)
                 throw std::invalid_argument("Arity cannot be zero");

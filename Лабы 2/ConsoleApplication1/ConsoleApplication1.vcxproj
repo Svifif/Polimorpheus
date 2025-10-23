@@ -138,6 +138,8 @@
     <ClInclude Include="LazySequence.hpp" />
     <ClInclude Include="LazySequenceTests.hpp" />
     <ClInclude Include="Sequence.hpp" />
+    <ClInclude Include="SmartPointer.hpp" />
+    <ClInclude Include="SmartPointerTests.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

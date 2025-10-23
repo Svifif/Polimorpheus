@@ -202,7 +202,8 @@ void addPredefinedFunction()
 
         newFunc = {tokens[0],predefinedFuncs[tokens[0]],parseCoefficients(tokens[1]),parseInterval(tokens[2])};
     }
-    else {
+    else 
+    {
         if (tokens.size() != 7 ||(tokens[3] != "+" && tokens[3] != "*" && tokens[3] != "/" && tokens[3] != "&")) 
         {
             cerr << "Неверный формат составной функции!\n";
@@ -252,19 +253,22 @@ void renderPlot(GLFWwindow* window)
         const double step = (func.interval.second - func.interval.first) / SAMPLE_POINTS;
         int pointsInRow = 0;
 
-        for (double x = func.interval.first; x <= func.interval.second; x += step) {
+        for (double x = func.interval.first; x <= func.interval.second; x += step) 
+        {
             double y = evaluateFunction(func, x);
             if (isfinite(y)) {
                 yMin = min(yMin, y);
                 yMax = max(yMax, y);
                 pointsInRow++;
             }
-            else {
+            else
+            {
                 pointsInRow = 0;
             }
 
             // Прерываем если слишком много точек подряд дают NaN/Inf
-            if (pointsInRow == 0 && x > func.interval.first + step * 10) {
+            if (pointsInRow == 0 && x > func.interval.first + step * 10)
+            {
                 break;
             }
         }
@@ -366,14 +370,17 @@ void removeFunction()
     printFunctionList();
 }
 
-void clearAllFunctions() {
+void clearAllFunctions()
+{
     userFunctions.clear();
     cout << "Все функции удалены.\n";
 }
 
-int main() {
+int main()
+{
     SetConsoleOutputCP(65001);
-    if (!glfwInit()) {
+    if (!glfwInit()) 
+    {
         cerr << "Ошибка инициализации GLFW!\n";
         return -1;
     }
@@ -420,7 +427,8 @@ int main() {
                 {
                     cout << "f" << i << "(" << x << ") = " << result << "\n";
                 }
-                else {
+                else 
+                {
                     cout << "f" << i << "(" << x << ") не определена\n";
                 }
             }
