@@ -140,6 +140,9 @@
     <ClInclude Include="Sequence.hpp" />
     <ClInclude Include="SmartPointer.hpp" />
     <ClInclude Include="SmartPointerTests.hpp" />
+    <ClInclude Include="Tape.hpp" />
+    <ClInclude Include="TapeTests.hpp" />
+    <ClInclude Include="Transition.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

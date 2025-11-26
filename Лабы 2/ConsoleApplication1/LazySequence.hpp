@@ -16,30 +16,44 @@ private:
 
 public:
     // Конструкторы
-    LazySequence() : cash(new MArraySequence<T>()), ExCntr(0), rule(nullptr) {}
-    explicit LazySequence(T* items, int count): cash(new MArraySequence<T>(items, count)), ExCntr(0), rule(nullptr) {}
-    explicit LazySequence(MArraySequence<T>* seq): cash(seq ? seq : new MArraySequence<T>()), ExCntr(cash->GetLength()), rule(nullptr) {}
-    explicit LazySequence(std::function<T(int)> genFunc, int k): cash(new MArraySequence<T>()), ExCntr(0), rule(new std::function<T(int)>(std::move(genFunc)))
+    LazySequence() : cash(new MArraySequence<T>()), ExCntr(0), rule(nullptr)
     {
-        if (!rule) throw std::invalid_argument("rule is empty");
-        for (int i = 0; i < k; ++i) {
+    }
+
+    explicit LazySequence(T* items, int count) : cash(new MArraySequence<T>(items, count)), ExCntr(0), rule(nullptr)
+    {
+    }
+
+    explicit LazySequence(MArraySequence<T>* seq) : cash(seq ? seq : new MArraySequence<T>()), ExCntr(cash ? cash->GetLength() : 0), rule(nullptr)
+    {
+    }
+
+    explicit LazySequence(std::function<T(int)> genFunc, int k) : cash(new MArraySequence<T>()), ExCntr(0), rule(new std::function<T(int)>(std::move(genFunc)))
+    {
+        if (!rule)
+        {
+            throw std::invalid_argument("rule is empty");
+        }
+        for (int i = 0; i < k; ++i)
+        {
             cash->Append((*rule)(i));
             ExCntr++;
         }
     }
-    LazySequence(const LazySequence& other): cash(new MArraySequence<T>(*other.cash)), ExCntr(other.ExCntr)
+
+    LazySequence(const LazySequence& other) : cash(other.cash ? new MArraySequence<T>(*other.cash) : nullptr), ExCntr(other.ExCntr)
     {
-        if (other.rule) 
+        if (other.rule)
         {
             rule = new std::function<T(int)>(*other.rule);
         }
-        else 
+        else
         {
             rule = nullptr;
         }
     }
 
-    LazySequence(LazySequence&& other) noexcept: cash(other.cash), ExCntr(other.ExCntr), rule(other.rule)
+    LazySequence(LazySequence&& other) noexcept : cash(other.cash), ExCntr(other.ExCntr), rule(other.rule)
     {
         other.cash = nullptr;
         other.ExCntr = 0;
@@ -52,22 +66,23 @@ public:
         {
             delete cash;
             delete rule;
-            cash = new MArraySequence<T>(*other.cash);
+            cash = other.cash ? new MArraySequence<T>(*other.cash) : nullptr;
             ExCntr = other.ExCntr;
-            if (other.rule) 
+            if (other.rule)
             {
                 rule = new std::function<T(int)>(*other.rule);
             }
-            else 
+            else
             {
                 rule = nullptr;
             }
         }
         return *this;
     }
+
     LazySequence& operator=(LazySequence&& other) noexcept
     {
-        if (this != &other) 
+        if (this != &other)
         {
             delete cash;
             delete rule;
@@ -90,24 +105,40 @@ public:
     // Методы доступа
     T Get(int index)
     {
-        if (index < 0) throw std::out_of_range("Negative index");
-        if (rule && index >= cash->GetLength()) 
+        if (!cash)
         {
-            for (int i = cash->GetLength(); i <= index; ++i) 
+            throw std::runtime_error("Accessing destroyed sequence");
+        }
+        if (index < 0)
+        {
+            throw std::out_of_range("Negative index");
+        }
+        if (rule && index >= cash->GetLength())
+        {
+            for (int i = cash->GetLength(); i <= index; ++i)
             {
                 cash->Append((*rule)(i));
                 ExCntr++;
             }
         }
-        if (index >= cash->GetLength()) throw std::out_of_range("Index out of range");
+        if (index >= cash->GetLength())
+        {
+            throw std::out_of_range("Index out of range");
+        }
         return cash->Get(index);
     }
 
-    T GetFirst() { return Get(0); }
+    T GetFirst()
+    {
+        return Get(0);
+    }
 
     T GetLast()
     {
-        if (cash->GetLength() == 0) throw std::out_of_range("Sequence is empty");
+        if (!cash || cash->GetLength() == 0)
+        {
+            throw std::out_of_range("Sequence is empty");
+        }
         return cash->Get(cash->GetLength() - 1);
     }
 
@@ -115,95 +146,158 @@ public:
     {
         return cash ? Cardinal(0, cash->GetLength()) : Cardinal(0, 0);
     }
-    size_t GetExCntr() const { return ExCntr; }
+
+    size_t GetExCntr() const
+    {
+        return ExCntr;
+    }
 
     // Методы модификации
-    LazySequence* Append(T item) { cash->Append(item); return this; }
-    LazySequence* Prepend(T item) { cash->Prepend(item); return this; }
-    LazySequence* InsertAt(T item, int index) { cash->InsertAt(item, index); return this; }
+    LazySequence* Append(T item)
+    {
+        if (cash)
+        {
+            cash->Append(item);
+        }
+        return this;
+    }
+
+    LazySequence* Prepend(T item)
+    {
+        if (cash)
+        {
+            cash->Prepend(item);
+        }
+        return this;
+    }
+
+    LazySequence* InsertAt(T item, int index)
+    {
+        if (cash)
+        {
+            cash->InsertAt(item, index);
+        }
+        return this;
+    }
 
     LazySequence* GetSubsequence(int startIndex, int endIndex)
     {
-        Sequence<T>* temp = cash->GetSubsequence(startIndex, endIndex);
+        if (!cash)
+        {
+            throw std::runtime_error("Accessing destroyed sequence");
+        }
 
-        // Проверяем что это действительно MArraySequence
-        MArraySequence<T>* subsequence = dynamic_cast<MArraySequence<T>*>(temp);
-        if (subsequence) 
+        // Создаем подпоследовательность вручную (безопаснее)
+        MArraySequence<T>* newArray = new MArraySequence<T>();
+        for (int i = startIndex; i <= endIndex; ++i)
         {
-            return new LazySequence(subsequence);
+            newArray->Append(this->Get(i));
         }
-        else 
-        {
-            // Если не MArraySequence, создаем новый из данных
-            MArraySequence<T>* newArray = new MArraySequence<T>();
-            for (int i = startIndex; i <= endIndex; ++i) {
-                newArray->Append(cash->Get(i));
-            }
-            delete temp;
-            return new LazySequence(newArray);
-        }
+        return new LazySequence(newArray);
     }
 
     // Композиционные методы
-    LazySequence<T> * Concat(LazySequence* list)
+    LazySequence* Concat(LazySequence* list)
     {
-        return new LazySequence<T>(this, Cardinal(0, cash->GetLength()), list);
+        if (!cash || !list || !list->cash)
+        {
+            throw std::invalid_argument("Invalid sequences for concatenation");
+        }
+
+        // Безопасная ручная реализация конкатенации
+        MArraySequence<T>* newArray = new MArraySequence<T>();
+
+        // Копируем элементы из текущей последовательности
+        for (int i = 0; i < this->GetLength().index; ++i)
+        {
+            newArray->Append(this->Get(i));
+        }
+
+        // Копируем элементы из второй последовательности
+        for (int i = 0; i < list->GetLength().index; ++i)
+        {
+            newArray->Append(list->Get(i));
+        }
+
+        return new LazySequence(newArray);
     }
 
-    /*LazySequence<T>* InsertLSeq(LazySequence* seq, Cardinal position)
-    {
-        return new LazySequence<T>(this, position, seq);
-    }*/
-
-    // Функциональные методы (используем готовые из Sequence)
-// Функциональные методы (используем готовые из Sequence)
+    // Функциональные методы
     template<class T2>
     LazySequence<T2>* Map(T2(*func)(T))
     {
-        // Вызываем Map с указанием типа результата и типа последовательности
-        MArraySequence<T2> result = cash->Map<T2, MArraySequence<T2>>(func);
-        return new LazySequence<T2>(new MArraySequence<T2>(result));
+        if (!cash)
+        {
+            throw std::runtime_error("Accessing destroyed sequence");
+        }
+
+        // Ручная реализация Map
+        MArraySequence<T2>* resultArray = new MArraySequence<T2>();
+        for (int i = 0; i < cash->GetLength(); ++i)
+        {
+            resultArray->Append(func(cash->Get(i)));
+        }
+        return new LazySequence<T2>(resultArray);
     }
 
     template<class T2>
     T2 Reduce(T2(*func)(T2, T), T2 initial)
     {
-        // Reduce возвращает значение, а не последовательность
-        return cash->Reduce(func, initial);
+        if (!cash)
+        {
+            throw std::runtime_error("Accessing destroyed sequence");
+        }
+
+        // Ручная реализация Reduce
+        T2 result = initial;
+        for (int i = 0; i < cash->GetLength(); ++i)
+        {
+            result = func(result, cash->Get(i));
+        }
+        return result;
     }
 
     LazySequence* Where(bool (*predicate)(T))
     {
-        // Вызываем Where - он возвращает Sequence<T>*
-        Sequence<T>* result = cash->Where(predicate);
+        if (!cash)
+        {
+            throw std::runtime_error("Accessing destroyed sequence");
+        }
 
-        // Преобразуем к MArraySequence<T>*
-        MArraySequence<T>* arrayResult = dynamic_cast<MArraySequence<T>*>(result);
-        if (arrayResult) {
-            return new LazySequence(arrayResult);
-        }
-        else {
-            // Если преобразование не удалось, создаем новый массив
-            MArraySequence<T>* newArray = new MArraySequence<T>();
-            for (int i = 0; i < result->GetLength(); ++i) {
-                newArray->Append(result->Get(i));
+        // Ручная реализация Where
+        MArraySequence<T>* resultArray = new MArraySequence<T>();
+        for (int i = 0; i < cash->GetLength(); ++i)
+        {
+            T current = cash->Get(i);
+            if (predicate(current))
+            {
+                resultArray->Append(current);
             }
-            delete result;
-            return new LazySequence(newArray);
         }
+        return new LazySequence(resultArray);
     }
+
     LazySequence* Zip(LazySequence* seq, T(*zipper)(T, T))
     {
-        if (!zipper) {
+        if (!zipper)
+        {
             throw std::invalid_argument("Zipper function cannot be null");
         }
+        if (!cash || !seq || !seq->cash)
+        {
+            throw std::invalid_argument("Invalid sequences for zip");
+        }
 
-        // Разделяем вызовы на отдельные шаги
-        MArraySequence<T> tempResult = cash->Zip<T, T, MArraySequence<T>>(seq->cash, zipper);
-        MArraySequence<T>* resultArray = new MArraySequence<T>(tempResult);
+        // Ручная реализация Zip
+        MArraySequence<T>* resultArray = new MArraySequence<T>();
+        int minLength = std::min(this->GetLength().index, seq->GetLength().index);
 
-        // Создаем LazySequence из MArraySequence
-        return new LazySequence<T>(resultArray);
+        for (int i = 0; i < minLength; ++i)
+        {
+            resultArray->Append(zipper(this->Get(i), seq->Get(i)));
+        }
+
+        return new LazySequence(resultArray);
     }
 };
 /*

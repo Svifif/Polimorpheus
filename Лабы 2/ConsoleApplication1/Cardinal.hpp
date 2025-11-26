@@ -17,8 +17,7 @@ public:
     Cardinal(const Cardinal& other) : order(other.order), index(other.index) {}
 
     // Move конструктор
-    Cardinal(Cardinal&& other) noexcept
-        : order(other.order), index(other.index)
+    Cardinal(Cardinal&& other) noexcept: order(other.order), index(other.index)
     {
         other.order = 0;
         other.index = 0;
@@ -43,7 +42,8 @@ public:
     // Оператор присваивания
     Cardinal& operator=(const Cardinal& other)
     {
-        if (this != &other) {
+        if (this != &other) 
+        {
             order = other.order;
             index = other.index;
         }

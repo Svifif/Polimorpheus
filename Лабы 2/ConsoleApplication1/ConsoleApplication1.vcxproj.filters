@@ -50,5 +50,14 @@
     <ClInclude Include="SmartPointerTests.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Tape.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Transition.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TapeTests.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
