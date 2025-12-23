@@ -2,16 +2,10 @@
 # Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs
-/Лабы/.vs/Laba1
-/Лабы/Laba1/x64/Debug
-/Лабы/x64/Debug
+.vs/
 *.user
-/Лабы/Laba1/.vs/Laba1
 Debug/
 *.tlog
-/Линейная алгебра/perceptron/.vs/perceptron
 /Линейная алгебра/perceptron/obj
-/Лабы 2/ConsoleApplication1/.vs/ConsoleApplication1
-/Лабы 2/lab2/.vs/lab2/v17
-/Лабы 2/lab2/.vs/lab2/FileContentIndex
+
+vcpkg_installed/
