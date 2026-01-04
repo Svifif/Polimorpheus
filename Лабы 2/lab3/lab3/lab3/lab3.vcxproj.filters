@@ -15,27 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="extra.cpp">
+    <ClCompile Include="lab3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="generate_maze.hpp">
+    <ClInclude Include="GraphAlgorithms.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="dijkstra_search.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="visualization.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="multi_agent_predictive.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hero_vs_enemy_real.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="genetic_evolution.hpp">
+    <ClInclude Include="tests.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
