@@ -45,13 +45,7 @@ bool find_path_with_mode(int mode)
         return !multi_agent_paths.empty() && !multi_agent_paths[0].empty();
 
     case 3:
-        std::cout << "Algorithm: HERO VS ENEMY - PANIC MODE 😱\n";
-        std::cout << "🚨🚨🚨 ВНИМАНИЕ: ПСИХИЧЕСКИ НЕУРАВНОВЕШЕННЫЙ ГЕРОЙ! 🚨🚨🚨\n";
-        std::cout << "⚠️  Особенности режима 'Паническая атака':\n";
-        std::cout << "   • Герой может ТЕЛЕПОРТИРОВАТЬСЯ по желанию левой пятки\n";
-        std::cout << "   • Стратегия: 'Беги туда, не знаю куда'\n";
-        std::cout << "   • Шанс на выживание: ???\n";
-        std::cout << "   • Развлечение гарантировано! 😂\n\n";
+
 
         multi_agent_paths = find_hero_vs_enemy_paths();
         return !multi_agent_paths.empty() && !multi_agent_paths[0].empty();
@@ -67,8 +61,8 @@ bool find_path_with_mode(int mode)
         return !path.empty();
 
     case 6:
-        std::cout << "Algorithm: HERO VS ENEMY - FIXED MODE 🧠\n";
-        std::cout << "🎯 Режим 'Стратегическое противостояние':\n";
+        std::cout << "Algorithm: HERO VS ENEMY - FIXED MODE \n";
+        std::cout << " Режим 'Стратегическое противостояние':\n";
         std::cout << "   • Герой использует разумную тактику\n";
         std::cout << "   • НИКАКОЙ ТЕЛЕПОРТАЦИИ!\n";
         std::cout << "   • Реалистичное преследование\n";
@@ -116,11 +110,11 @@ void run_multi_agent_animation(sf::RenderWindow& window,
     // Особые сообщения для разных режимов
     if (current_mode == 3)  // Panic Mode
     {
-        std::cout << "🎭 MODE: PANIC MODE - PSYCHOLOGICAL THRILLER!\n";
-        std::cout << "👤 Hero: Paranoid schizophrenic (YELLOW)\n";
-        std::cout << "👹 Enemy: Calm hunter (RED)\n";
-        std::cout << "💊 Symptoms: Random teleportation, panic attacks\n";
-        std::cout << "🏥 Prognosis: Likely self-destruction\n\n";
+        std::cout << " MODE: PANIC MODE - PSYCHOLOGICAL THRILLER!\n";
+        std::cout << " Hero: Paranoid schizophrenic (YELLOW)\n";
+        std::cout << " Enemy: Calm hunter (RED)\n";
+        std::cout << " Symptoms: Random teleportation, panic attacks\n";
+        std::cout << " Prognosis: Likely self-destruction\n\n";
 
         std::cout << "=== MEDICAL WARNING ===\n";
         std::cout << "The hero suffers from:\n";
@@ -132,11 +126,11 @@ void run_multi_agent_animation(sf::RenderWindow& window,
     }
     else if (current_mode == 6)  // Fixed Mode
     {
-        std::cout << "🧠 MODE: STRATEGIC PURSUIT - MIND GAME\n";
-        std::cout << "👑 Hero: Strategic thinker (GOLD)\n";
-        std::cout << "👿 Enemy: Persistent hunter (DARK RED)\n";
-        std::cout << "🎯 Goal: Outsmart the opponent\n";
-        std::cout << "⚔️  Rules: Collision = instant defeat\n\n";
+        std::cout << " MODE: STRATEGIC PURSUIT - MIND GAME\n";
+        std::cout << " Hero: Strategic thinker (GOLD)\n";
+        std::cout << " Enemy: Persistent hunter (DARK RED)\n";
+        std::cout << " Goal: Outsmart the opponent\n";
+        std::cout << "⚔  Rules: Collision = instant defeat\n\n";
     }
     else if (current_mode == 2)
     {
@@ -148,7 +142,7 @@ void run_multi_agent_animation(sf::RenderWindow& window,
 
     if (current_mode == 3 || current_mode == 6)
     {
-        std::cout << "⚔️  COLLISION RULES: Instant defeat for hero!\n";
+        std::cout << "  COLLISION RULES: Instant defeat for hero!\n";
     }
 
     for (size_t i = 0; i < paths.size(); i++)
@@ -355,7 +349,7 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                         hero.current_hunger = 0;
                         collision_occurred = true;
 
-                        std::cout << "\n⚔️ ⚔️ ⚔️ DEADLY COLLISION! ⚔️ ⚔️ ⚔️\n";
+                        std::cout << "\n DEADLY COLLISION! \n";
                         std::cout << "Enemy caught hero at position (" << hx << "," << hy << ")\n";
 
                         hero.alive = false;
@@ -427,15 +421,15 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                 std::cout << "\n=== PANIC MODE RESULTS ===\n";
                 if (collision_occurred)
                 {
-                    std::cout << "💀 Hero was caught (as expected with all that teleportation!)\n";
+                    std::cout << " Hero was caught (as expected with all that teleportation!)\n";
                 }
                 else if (agents_data[0].alive)
                 {
-                    std::cout << "🎉 Hero survived (despite the panic attacks!)\n";
+                    std::cout << " Hero survived (despite the panic attacks!)\n";
                 }
                 else
                 {
-                    std::cout << "⚰️  Hero died from hunger (too busy panicking to eat)\n";
+                    std::cout << "  Hero died from hunger (too busy panicking to eat)\n";
                 }
                 std::cout << "=========================\n";
             }
@@ -444,15 +438,15 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                 std::cout << "\n=== STRATEGIC MODE RESULTS ===\n";
                 if (collision_occurred)
                 {
-                    std::cout << "⚔️  Enemy victory - better strategy needed!\n";
+                    std::cout << "  Enemy victory - better strategy needed!\n";
                 }
                 else if (agents_data[0].alive)
                 {
-                    std::cout << "🏆 Hero victory - excellent tactics!\n";
+                    std::cout << " Hero victory - excellent tactics!\n";
                 }
                 else
                 {
-                    std::cout << "💀 Hero perished - need more resources!\n";
+                    std::cout << " Hero perished - need more resources!\n";
                 }
                 std::cout << "============================\n";
             }
@@ -517,10 +511,10 @@ void print_controls()
     std::cout << "1-6: Select algorithm mode\n";
     std::cout << "  1: Single agent - Dijkstra with hunger\n";
     std::cout << "  2: Two agents - Mutual prediction\n";
-    std::cout << "  3: Hero vs Enemy - PANIC MODE 😱 (LEGENDARY BUGS!)\n";
+    std::cout << "  3: Hero vs Enemy - PANIC MODE  (LEGENDARY BUGS!)\n";
     std::cout << "  4: Neural Network - Train new\n";
     std::cout << "  5: Neural Network - Load trained\n";
-    std::cout << "  6: Hero vs Enemy - FIXED MODE 🧠 (No teleportation)\n";
+    std::cout << "  6: Hero vs Enemy - FIXED MODE  (No teleportation)\n";
     std::cout << "R: Regenerate maze\n";
     std::cout << "SPACE: Start animation\n";
     std::cout << "P: Pause/resume animation\n";
@@ -530,7 +524,7 @@ void print_controls()
     std::cout << "================\n\n";
 
     std::cout << "=== SPECIAL MODE 3 INFO ===\n";
-    std::cout << "🔥 PANIC MODE features:\n";
+    std::cout << " PANIC MODE features:\n";
     std::cout << "   • Hero with psychological issues\n";
     std::cout << "   • Random teleportation episodes\n";
     std::cout << "   • Panic attacks and paranoia\n";
@@ -550,7 +544,7 @@ int main()
 
     std::cout << "========================================\n";
     std::cout << "     MAZE PATHFINDING SIMULATION 2.0    \n";
-    std::cout << "     Featuring: PANIC MODE 😱           \n";
+    std::cout << "     Featuring: PANIC MODE            \n";
     std::cout << "========================================\n\n";
 
     print_controls();
