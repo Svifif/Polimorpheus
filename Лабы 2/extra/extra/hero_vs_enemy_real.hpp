@@ -440,7 +440,7 @@ std::vector<std::pair<int, int>> smart_enemy_pursuit(
         std::make_pair(ex, ey));
     memory.chasing_mode = false; // Начинаем в режиме засады
 
-    std::cout << "🧠 SMART ENEMY AI ACTIVATED!\n";
+    std::cout << " SMART ENEMY AI ACTIVATED!\n";
     std::cout << " Initial ambush point: ("
         << memory.ambush_point.first << ","
         << memory.ambush_point.second << ")\n";
@@ -468,7 +468,7 @@ std::vector<std::pair<int, int>> smart_enemy_pursuit(
             memory.chasing_mode = true;
             memory.bait_mode = false;
 
-            std::cout << "👁️ Enemy spotted hero at ("
+            std::cout << " Enemy spotted hero at ("
                 << hx << "," << hy << "), distance: "
                 << dist_to_hero << " cells\n";
 
@@ -626,7 +626,7 @@ std::vector<std::pair<int, int>> smart_enemy_pursuit(
         }
     }
 
-    std::cout << "\n🤖 SMART ENEMY AI FINISHED\n";
+    std::cout << "\n SMART ENEMY AI FINISHED\n";
     std::cout << " Enemy path length: " << (enemy_path.size() - 1) << " steps\n";
     std::cout << " Failed predictions: " << failed_predictions << "\n";
     std::cout << " FINAL WARNING: Smart enemy is DANGEROUS!\n";
@@ -687,7 +687,7 @@ std::vector<std::pair<int, int>> find_smart_hero_path(
             if (dist_to_enemy <= HERO_BAIT_DISTANCE && !tactics.bait_active)
             {
                 // Враг очень близко - активируем тактику "приманки"
-                std::cout << " 🎣 BAIT TACTIC ACTIVATED! Leading enemy to dead end\n";
+                std::cout << "  BAIT TACTIC ACTIVATED! Leading enemy to dead end\n";
 
                 tactics.current_strategy = HeroTactics::BAIT_ENEMY;
                 tactics.bait_active = true;
@@ -715,7 +715,7 @@ std::vector<std::pair<int, int>> find_smart_hero_path(
             else if (dist_to_enemy <= ENEMY_VISION_RANGE + 2)
             {
                 // Враг в зоне опасности - ищем обходной путь
-                std::cout << " 🚫 EVASION TACTIC: Finding alternative route\n";
+                std::cout << "  EVASION TACTIC: Finding alternative route\n";
 
                 tactics.current_strategy = HeroTactics::EVADE_ENEMY;
 
@@ -763,7 +763,7 @@ std::vector<std::pair<int, int>> find_smart_hero_path(
         }
     }
 
-    std::cout << "\n🏃 SMART HERO FINISHED\n";
+    std::cout << "\n SMART HERO FINISHED\n";
     std::cout << " Hero path length: " << (hero_path.size() - 1) << " steps\n";
     std::cout << " Enemy spotted: " << (tactics.enemy_spotted ? "YES" : "NO") << "\n";
     std::cout << " Bait tactic used: " << (tactics.bait_active ? "YES" : "NO") << "\n";
@@ -798,8 +798,8 @@ std::vector<std::vector<std::pair<int, int>>> find_hero_vs_enemy_paths()
 
     enemy_start = std::make_pair(ex, ey);
 
-    std::cout << "⚠️ SMART ENEMY SPAWNED AT (" << ex << ", " << ey << ")\n";
-    std::cout << "⚠️ Distance from hero: " << (abs(ex - 0) + abs(ey - 0))
+    std::cout << " SMART ENEMY SPAWNED AT (" << ex << ", " << ey << ")\n";
+    std::cout << " Distance from hero: " << (abs(ex - 0) + abs(ey - 0))
         << " cells\n\n";
 
     // Умный путь героя
@@ -836,18 +836,18 @@ std::vector<std::vector<std::pair<int, int>>> find_hero_vs_enemy_paths()
         }
     }
 
-    std::cout << "\n🎯 ANALYSIS COMPLETE\n";
+    std::cout << "\n ANALYSIS COMPLETE\n";
     std::cout << " Hero path: " << hero_path.size() - 1 << " steps\n";
     std::cout << " Enemy path: " << enemy_path.size() - 1 << " steps\n";
     std::cout << " Collision possible: "
-        << (collision_possible ? "YES ⚠️" : "NO ✅") << "\n";
+        << (collision_possible ? "YES ⚠️" : "NO ") << "\n";
 
     if (collision_possible)
     {
         std::cout << " RISK: Hero must use evasion tactics!\n";
     }
 
-    std::cout << "\n🚀 Press SPACE for the ultimate chase!\n";
+    std::cout << "\n Press SPACE for the ultimate chase!\n";
 
     std::vector<std::vector<std::pair<int, int>>> result;
     result.push_back(hero_path);
