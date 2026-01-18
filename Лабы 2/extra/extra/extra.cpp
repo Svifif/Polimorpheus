@@ -4,7 +4,7 @@
 #include "hero_vs_enemy_real.hpp"       // Panic Mode (оригинальный с багами)
 #include "hero_vs_enemy_fixed.hpp"      // Fixed Mode (исправленный)
 #include "visualization.hpp"
-#include "genetic_evolution.hpp"        // Нейросеть
+#include "genetic_evolution.hpp"        
 #include <SFML/Graphics.hpp>
 #include <iomanip>
 #ifdef _WIN32
@@ -130,7 +130,7 @@ void run_multi_agent_animation(sf::RenderWindow& window,
         std::cout << " Hero: Strategic thinker (GOLD)\n";
         std::cout << " Enemy: Persistent hunter (DARK RED)\n";
         std::cout << " Goal: Outsmart the opponent\n";
-        std::cout << "⚔  Rules: Collision = instant defeat\n\n";
+        std::cout << "  Rules: Collision = instant defeat\n\n";
     }
     else if (current_mode == 2)
     {
@@ -650,7 +650,7 @@ int main()
                             std::cout << "\nStarting animation...\n";
                             if (current_mode == 3)
                             {
-                                std::cout << "⚠️ MEDICAL WARNING: Patient #001 is unstable!\n";
+                                std::cout << " MEDICAL WARNING: Patient #001 is unstable!\n";
                                 std::cout << "   Keep all sharp objects away from screen.\n\n";
                             }
                             run_multi_agent_animation(window, maze, multi_agent_paths, font, current_mode);
