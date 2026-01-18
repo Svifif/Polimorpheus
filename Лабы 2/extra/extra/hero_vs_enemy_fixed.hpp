@@ -86,7 +86,7 @@ std::vector<std::pair<int, int>> find_simple_path_fixed(int start_x, int start_y
 {
     if (debug)
     {
-        std::cout << "\n🔍 PATH DEBUG STARTED =================================\n";
+        std::cout << "\n PATH DEBUG STARTED =================================\n";
         std::cout << "From: (" << start_x << "," << start_y << ") to ("
             << target_x << "," << target_y << ")\n";
     }
@@ -150,7 +150,7 @@ std::vector<std::pair<int, int>> find_simple_path_fixed(int start_x, int start_y
         {
             if (debug)
             {
-                std::cout << "🎯 TARGET REACHED! Reconstructing path...\n";
+                std::cout << " TARGET REACHED! Reconstructing path...\n";
                 std::cout << "Nodes expanded: " << nodes_expanded << "\n";
             }
 
@@ -223,7 +223,7 @@ std::vector<std::pair<int, int>> find_simple_path_fixed(int start_x, int start_y
                         valid = false;
                     }
                 }
-                if (valid) std::cout << "✅ Path is valid (no teleportation)\n";
+                if (valid) std::cout << " Path is valid (no teleportation)\n";
                 std::cout << "================================================\n";
             }
 
@@ -355,7 +355,7 @@ std::pair<int, int> find_safe_point_fixed(int hero_x, int hero_y,
 
     if (debug)
     {
-        std::cout << "✅ SAFE POINT FOUND:\n";
+        std::cout << " SAFE POINT FOUND:\n";
         std::cout << "   Best point: (" << best_point.first << "," << best_point.second << ")\n";
         std::cout << "   Score: " << best_score << "\n";
         std::cout << "   Points checked: " << points_checked << "\n";
@@ -576,7 +576,7 @@ std::vector<std::pair<int, int>> find_smart_hero_path_fixed(
 
         if (debug)
         {
-            std::cout << "\n📊 Step " << i << ":\n";
+            std::cout << "\n Step " << i << ":\n";
             std::cout << "  Hero position: (" << hx << "," << hy << ")\n";
             std::cout << "  Next optimal: (" << next_hx << "," << next_hy << ")\n";
             std::cout << "  Enemy: (" << ex << "," << ey << ")\n";

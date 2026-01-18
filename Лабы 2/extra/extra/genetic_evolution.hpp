@@ -601,7 +601,7 @@ std::vector<WeightedTrainingExample> generate_weighted_training_data(int num_maz
 {
     std::vector<WeightedTrainingExample> training_data;
 
-    std::cout << "\n🔧 Generating WEIGHTED training data..." << std::endl;
+    std::cout << "\n Generating WEIGHTED training data..." << std::endl;
     std::cout << "   Examples from LATER steps get MORE weight!" << std::endl;
 
     WeightedNeuralNetwork temp_nn;
@@ -675,7 +675,7 @@ std::vector<WeightedTrainingExample> generate_weighted_training_data(int num_maz
     add_critical_examples(training_data, temp_nn);
 
     // Статистика сгенерированных данных
-    std::cout << "\n✅ Generated " << training_data.size() << " WEIGHTED examples from "
+    std::cout << "\n Generated " << training_data.size() << " WEIGHTED examples from "
         << successful_mazes << "/" << num_mazes << " mazes" << std::endl;
 
     // Вычисление статистики весов
@@ -708,8 +708,8 @@ std::vector<WeightedTrainingExample> generate_weighted_training_data(int num_maz
 std::vector<std::pair<int, int>> find_path_weighted_neural(bool use_pretrained = false)
 {
     std::cout << "\n" << std::string(70, '=') << std::endl;
-    std::cout << "   🧠⚖️  WEIGHTED NEURAL PATHFINDING" << std::endl;
-    std::cout << "   ⭐ LATER STEPS = MORE IMPORTANCE!" << std::endl;
+    std::cout << "     WEIGHTED NEURAL PATHFINDING" << std::endl;
+    std::cout << "    LATER STEPS = MORE IMPORTANCE!" << std::endl;
     std::cout << std::string(70, '=') << std::endl;
 
     WeightedNeuralNetwork nn;
@@ -718,11 +718,11 @@ std::vector<std::pair<int, int>> find_path_weighted_neural(bool use_pretrained =
     // Загрузка предварительно обученной модели или обучение новой
     if (use_pretrained && nn.load_from_file(model_file))
     {
-        std::cout << "✅ Loaded pre-trained WEIGHTED network!" << std::endl;
+        std::cout << " Loaded pre-trained WEIGHTED network!" << std::endl;
     }
     else
     {
-        std::cout << "🔥 Training NEW WEIGHTED network..." << std::endl;
+        std::cout << " Training NEW WEIGHTED network..." << std::endl;
         std::cout << "   Examples from later path steps get MORE weight!" << std::endl;
 
         auto start = std::chrono::steady_clock::now();
@@ -744,12 +744,12 @@ std::vector<std::pair<int, int>> find_path_weighted_neural(bool use_pretrained =
         // Сохранение обученной модели
         if (nn.save_to_file(model_file))
         {
-            std::cout << "💾 Saved WEIGHTED model to " << model_file << std::endl;
+            std::cout << " Saved WEIGHTED model to " << model_file << std::endl;
         }
     }
 
     // Поиск пути с использованием обученной нейронной сети
-    std::cout << "\n🎯 Finding path with WEIGHTED neural network..." << std::endl;
+    std::cout << "\n Finding path with WEIGHTED neural network..." << std::endl;
 
     std::vector<std::pair<int, int>> neural_path;
     std::set<std::pair<int, int>> visited;
@@ -769,7 +769,7 @@ std::vector<std::pair<int, int>> find_path_weighted_neural(bool use_pretrained =
         // Проверка достижения выхода
         if (x == WIDTH - 1 && y == HEIGHT - 1)
         {
-            std::cout << "🎉 Reached exit at step " << steps << "!" << std::endl;
+            std::cout << " Reached exit at step " << steps << "!" << std::endl;
             break;
         }
 
@@ -839,7 +839,7 @@ std::vector<std::pair<int, int>> find_path_weighted_neural(bool use_pretrained =
                     if (maze[y][x].has_food)
                     {
                         hunger = std::min(100, hunger + FOOD_RESTORE);
-                        std::cout << "🍎 Found food at (" << x << "," << y << ")! Hunger: " << hunger << std::endl;
+                        std::cout << " Found food at (" << x << "," << y << ")! Hunger: " << hunger << std::endl;
                     }
 
                     moved = true;
@@ -861,37 +861,37 @@ std::vector<std::pair<int, int>> find_path_weighted_neural(bool use_pretrained =
 
     // Вывод результатов работы нейронной сети
     std::cout << "\n" << std::string(50, '-') << std::endl;
-    std::cout << "🏆 WEIGHTED NEURAL NETWORK RESULTS" << std::endl;
+    std::cout << " WEIGHTED NEURAL NETWORK RESULTS" << std::endl;
     std::cout << std::string(50, '-') << std::endl;
 
     bool reached_exit = (x == WIDTH - 1 && y == HEIGHT - 1);
     int distance = abs(WIDTH - 1 - x) + abs(HEIGHT - 1 - y);
     double efficiency = 100.0 * visited.size() / neural_path.size();
 
-    std::cout << "✅ Exit reached: " << (reached_exit ? "YES 🎉" : "NO ❌") << std::endl;
-    std::cout << "📍 Final position: (" << x << ", " << y << ")" << std::endl;
-    std::cout << "📏 Distance to exit: " << distance << " cells" << std::endl;
-    std::cout << "👣 Path length: " << neural_path.size() << " steps" << std::endl;
-    std::cout << "🔍 Unique cells: " << visited.size() << std::endl;
-    std::cout << "⚡ Efficiency: " << std::fixed << std::setprecision(1) << efficiency << "%" << std::endl;
-    std::cout << "🍎 Final hunger: " << hunger << "/" << INITIAL_HUNGER << std::endl;
+    std::cout << " Exit reached: " << (reached_exit ? "YES " : "NO ❌") << std::endl;
+    std::cout << " Final position: (" << x << ", " << y << ")" << std::endl;
+    std::cout << " Distance to exit: " << distance << " cells" << std::endl;
+    std::cout << " Path length: " << neural_path.size() << " steps" << std::endl;
+    std::cout << " Unique cells: " << visited.size() << std::endl;
+    std::cout << " Efficiency: " << std::fixed << std::setprecision(1) << efficiency << "%" << std::endl;
+    std::cout << " Final hunger: " << hunger << "/" << INITIAL_HUNGER << std::endl;
 
     // Оценка успешности
     if (reached_exit)
     {
-        std::cout << "\n✨✨✨ SUCCESS! Weighted neural network ROCKS! ✨✨✨" << std::endl;
+        std::cout << "\n SUCCESS! Weighted neural network ROCKS! " << std::endl;
         std::cout << "   Later steps = More importance strategy WORKED!" << std::endl;
     }
     else if (distance <= 3)
     {
-        std::cout << "\n👍 Almost there! Only " << distance << " cells away!" << std::endl;
+        std::cout << "\n Almost there! Only " << distance << " cells away!" << std::endl;
     }
     else if (distance <= 10)
     {
-        std::cout << "\n👌 Good progress! " << distance << " cells to go." << std::endl;
+        std::cout << "\n Good progress! " << distance << " cells to go." << std::endl;
     }
 
-    std::cout << "\n🎮 Press SPACE to animate the WEIGHTED neural agent!" << std::endl;
+    std::cout << "\n Press SPACE to animate the WEIGHTED neural agent!" << std::endl;
     std::cout << std::string(70, '=') << std::endl;
 
     return neural_path;
