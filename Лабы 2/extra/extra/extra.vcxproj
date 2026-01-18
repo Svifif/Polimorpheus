@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClInclude Include="dijkstra_search.hpp" />
     <ClInclude Include="generate_maze.hpp" />
+    <ClInclude Include="hero_vs_enemy_fixed.hpp" />
     <ClInclude Include="hero_vs_enemy_real.hpp" />
     <ClInclude Include="multi_agent_predictive.hpp" />
     <ClInclude Include="genetic_evolution.hpp" />

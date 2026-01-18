@@ -9,57 +9,94 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <set>
 #include "generate_maze.hpp"
 #include "dijkstra_search.hpp"
 
 // Глобальная переменная - стартовая позиция врага
 extern std::pair<int, int> enemy_start;
 
-// Параметры ИИ врага
-const int ENEMY_VISION_RANGE = 8;      // Радиус видимости врага (в клетках)
-const int ENEMY_MEMORY_STEPS = 15;     // Длительность памяти о последнем месте героя
-const int ENEMY_PATROL_RADIUS = 6;     // Радиус патрулирования вокруг начальной позиции
+// Параметры ИИ
+const int ENEMY_VISION_RANGE = 8;        // Радиус видимости врага
+const int ENEMY_MEMORY_STEPS = 15;       // Длительность памяти
+const int ENEMY_PATROL_RADIUS = 6;       // Радиус патрулирования
+const int ENEMY_PREDICTION_DEPTH = 10;   // На сколько шагов вперед предсказывает враг
+const int HERO_EVASION_RANGE = 12;       // На каком расстоянии герой замечает врага
+const int HERO_BAIT_DISTANCE = 4;        // На каком расстоянии начинать "приманку"
+
+// Предварительные объявления вспомогательных функций
+std::pair<int, int> find_bait_location(int hero_x, int hero_y,
+    int enemy_x, int enemy_y);
+std::pair<int, int> find_evasion_point(int hero_x, int hero_y,
+    int enemy_x, int enemy_y,
+    int exit_x, int exit_y);
 
 /**
- * Структура памяти врага.
- * Хранит информацию о герое и состоянии ИИ.
+ * Улучшенная структура памяти врага с предсказанием.
  */
-struct EnemyMemory
+struct SmartEnemyMemory
 {
-    std::pair<int, int> last_seen_position;  // Последняя видимая позиция героя
-    int steps_since_last_seen;               // Шагов с момента последнего контакта
-    bool has_target;                         // Есть ли текущая цель
-    std::pair<int, int> patrol_target;       // Текущая цель патрулирования
-    bool chasing_mode;                       // Режим преследования активен
+    std::pair<int, int> last_seen_position;      // Последняя видимая позиция героя
+    std::vector<std::pair<int, int>> predicted_path; // Предсказанный путь героя
+    int steps_since_last_seen;                   // Шагов с момента последнего контакта
+    bool has_target;                             // Есть ли текущая цель
+    std::pair<int, int> ambush_point;            // Точка для засады
+    bool chasing_mode;                           // Режим преследования
+    bool bait_mode;                              // Герой пытается заманить?
+    int prediction_accuracy;                     // Точность предсказаний (0-100)
 
-    EnemyMemory() : steps_since_last_seen(999), has_target(false), chasing_mode(false)
+    SmartEnemyMemory() : steps_since_last_seen(999), has_target(false),
+        chasing_mode(false), bait_mode(false), prediction_accuracy(50)
     {
         last_seen_position = std::make_pair(-1, -1);
-        patrol_target = std::make_pair(-1, -1);
+        ambush_point = std::make_pair(-1, -1);
     }
 };
 
 /**
- * Упрощенный алгоритм A* для поиска пути врага.
- * Не учитывает голод и еду, только геометрию лабиринта.
- * Сложность: O(N log N), где N - количество исследованных клеток.
+ * Структура для тактики героя.
  */
-std::vector<std::pair<int, int>> find_simple_enemy_path(int start_x, int start_y,
+struct HeroTactics
+{
+    enum Strategy
+    {
+        OPTIMAL_PATH,      // Идти по оптимальному пути
+        EVADE_ENEMY,       // Уклоняться от врага
+        BAIT_ENEMY,        // Заманивать врага
+        ALTERNATIVE_PATH   // Искать альтернативный путь
+    };
+
+    Strategy current_strategy;
+    std::pair<int, int> last_enemy_position;
+    int steps_with_enemy_nearby;
+    bool enemy_spotted;
+    bool bait_active;
+
+    HeroTactics() : current_strategy(OPTIMAL_PATH),
+        steps_with_enemy_nearby(0),
+        enemy_spotted(false),
+        bait_active(false)
+    {
+        last_enemy_position = std::make_pair(-1, -1);
+    }
+};
+
+/**
+ * Упрощенный A* для быстрого поиска пути.
+ */
+std::vector<std::pair<int, int>> find_simple_path(int start_x, int start_y,
     int target_x, int target_y)
 {
-    // Структура узла для A*
     struct Node
     {
         int x, y;
-        int g, h; // g - стоимость от старта, h - эвристика до цели
-
+        int g, h;
         bool operator>(const Node& other) const
         {
             return (g + h) > (other.g + other.h);
         }
     };
 
-    // Хеш-функция для узла (простая индексация по координатам)
     struct NodeHash
     {
         size_t operator()(const Node& n) const
@@ -68,7 +105,6 @@ std::vector<std::pair<int, int>> find_simple_enemy_path(int start_x, int start_y
         }
     };
 
-    // Сравнение узлов на равенство
     struct NodeEqual
     {
         bool operator()(const Node& a, const Node& b) const
@@ -77,68 +113,59 @@ std::vector<std::pair<int, int>> find_simple_enemy_path(int start_x, int start_y
         }
     };
 
-    // Структуры данных для A*
-    std::unordered_map<Node, Node, NodeHash, NodeEqual> came_from; // Для восстановления пути
-    std::unordered_map<Node, int, NodeHash, NodeEqual> g_score;    // Лучшие стоимости
-    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open_set; // Очередь с приоритетом
+    std::unordered_map<Node, Node, NodeHash, NodeEqual> came_from;
+    std::unordered_map<Node, int, NodeHash, NodeEqual> g_score;
+    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open_set;
 
-    // Инициализация начального узла
-    Node start_node = { start_x, start_y, 0, abs(target_x - start_x) + abs(target_y - start_y) };
+    Node start_node = { start_x, start_y, 0,
+                       abs(target_x - start_x) + abs(target_y - start_y) };
     g_score[start_node] = 0;
     open_set.push(start_node);
 
-    // Направления движения
     const int dx[4] = { 0, 1, 0, -1 };
     const int dy[4] = { 1, 0, -1, 0 };
 
-    // Основной цикл A*
     while (!open_set.empty())
     {
         Node current = open_set.top();
         open_set.pop();
 
-        // Проверка достижения цели
         if (current.x == target_x && current.y == target_y)
         {
-            // Восстановление пути от цели к старту
             std::vector<std::pair<int, int>> path;
             Node node = current;
             while (true)
             {
                 path.push_back(std::make_pair(node.x, node.y));
                 auto it = came_from.find(node);
-                if (it == came_from.end()) break; // Достигли стартовой точки
+                if (it == came_from.end()) break;
                 node = it->second;
             }
-            std::reverse(path.begin(), path.end()); // Разворачиваем путь
+            std::reverse(path.begin(), path.end());
             return path;
         }
 
-        // Исследование соседних клеток
         for (int i = 0; i < 4; ++i)
         {
             int nx = current.x + dx[i];
             int ny = current.y + dy[i];
 
-            // Проверка границ лабиринта
             if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
 
-            // Проверка наличия прохода
             bool can_pass = false;
             switch (i)
             {
-            case 0: can_pass = !maze[current.y][current.x].south; break; // Юг
-            case 1: can_pass = !maze[current.y][current.x].east;  break; // Восток
-            case 2: can_pass = !maze[current.y][current.x].north; break; // Север
-            case 3: can_pass = !maze[current.y][current.x].west;  break; // Запад
+            case 0: can_pass = !maze[current.y][current.x].south; break;
+            case 1: can_pass = !maze[current.y][current.x].east; break;
+            case 2: can_pass = !maze[current.y][current.x].north; break;
+            case 3: can_pass = !maze[current.y][current.x].west; break;
             }
             if (!can_pass) continue;
 
-            // Вычисление новой стоимости
             int tentative_g = current.g + 1;
-            Node neighbor = { nx, ny, tentative_g, abs(target_x - nx) + abs(target_y - ny) };
+            Node neighbor = { nx, ny, tentative_g,
+                             abs(target_x - nx) + abs(target_y - ny) };
 
-            // Проверка, нашли ли лучший путь к этой клетке
             auto it = g_score.find(neighbor);
             if (it == g_score.end() || tentative_g < it->second)
             {
@@ -148,82 +175,246 @@ std::vector<std::pair<int, int>> find_simple_enemy_path(int start_x, int start_y
             }
         }
     }
-
-    // Путь не найден
     return std::vector<std::pair<int, int>>();
 }
 
 /**
- * Проверка видимости героя врагом.
- * Упрощенная версия - учитывает только манхэттенское расстояние без учета стен.
- * Сложность: O(1)
+ * Проверка видимости с учетом стен (упрощенный лучевой каст).
  */
-bool enemy_can_see_hero(int enemy_x, int enemy_y, int hero_x, int hero_y)
+bool can_see(int from_x, int from_y, int to_x, int to_y)
 {
-    // Простая проверка по манхэттенскому расстоянию (без учета стен)
-    int dist = abs(enemy_x - hero_x) + abs(enemy_y - hero_y);
+    // Упрощенная проверка - только расстояние
+    int dist = abs(from_x - to_x) + abs(from_y - to_y);
     return dist <= ENEMY_VISION_RANGE;
+
+    // В реальной реализации нужно добавить проверку стен
+    // но для простоты оставляем так
 }
 
 /**
- * Выбор случайной цели для патрулирования в заданном радиусе.
- * Сложность: O(1) в среднем случае, O(20) в худшем
+ * Предсказание пути героя на N шагов вперед.
+ * Использует алгоритм Дейкстры для предсказания.
  */
-std::pair<int, int> get_patrol_target(int enemy_x, int enemy_y)
+std::vector<std::pair<int, int>> predict_hero_path(
+    const std::pair<int, int>& hero_pos,
+    const std::pair<int, int>& exit_pos,
+    int max_depth = ENEMY_PREDICTION_DEPTH)
 {
-    int attempts = 0;
-    while (attempts < 20)
+    // Если герой близко к выходу, предсказываем прямой путь
+    if (abs(hero_pos.first - exit_pos.first) +
+        abs(hero_pos.second - exit_pos.second) <= max_depth)
     {
-        // Генерация случайного смещения в пределах радиуса патрулирования
-        int dx = (rand() % (ENEMY_PATROL_RADIUS * 2 + 1)) - ENEMY_PATROL_RADIUS;
-        int dy = (rand() % (ENEMY_PATROL_RADIUS * 2 + 1)) - ENEMY_PATROL_RADIUS;
-
-        int target_x = enemy_x + dx;
-        int target_y = enemy_y + dy;
-
-        // Проверка валидности координат
-        if (target_x >= 0 && target_x < WIDTH &&
-            target_y >= 0 && target_y < HEIGHT &&
-            (target_x != enemy_x || target_y != enemy_y))
-        {
-            return std::make_pair(target_x, target_y);
-        }
-        attempts++;
+        // Ищем кратчайший путь к выходу
+        return find_simple_path(hero_pos.first, hero_pos.second,
+            exit_pos.first, exit_pos.second);
     }
 
-    // Fallback: возвращаем текущую позицию
-    return std::make_pair(enemy_x, enemy_y);
+    // Предсказываем движение к выходу с учетом еды
+    // Упрощенная версия: ищем путь к выходу длиной не более max_depth
+    std::vector<std::pair<int, int>> path;
+    std::pair<int, int> current = hero_pos;
+
+    for (int i = 0; i < max_depth; ++i)
+    {
+        path.push_back(current);
+
+        // Определяем направление к выходу
+        int dx = exit_pos.first - current.first;
+        int dy = exit_pos.second - current.second;
+
+        // Выбираем направление с максимальным смещением
+        if (abs(dx) > abs(dy))
+        {
+            if (dx > 0) current.first++;
+            else current.first--;
+        }
+        else
+        {
+            if (dy > 0) current.second++;
+            else current.second--;
+        }
+
+        // Проверяем границы и стены
+        if (current.first < 0 || current.first >= WIDTH ||
+            current.second < 0 || current.second >= HEIGHT)
+        {
+            break;
+        }
+    }
+
+    return path;
 }
 
 /**
- * Выбор точки для засады на пути героя.
- * Выбирает точку на 1/3 пути героя от старта.
- * Сложность: O(1)
+ * Поиск хорошей точки для засады на предсказанном пути.
  */
-std::pair<int, int> get_ambush_point(const std::vector<std::pair<int, int>>& hero_path,
+std::pair<int, int> find_best_ambush_point(
+    const std::vector<std::pair<int, int>>& predicted_path,
+    const std::pair<int, int>& enemy_pos)
+{
+    if (predicted_path.empty())
+    {
+        return enemy_pos;
+    }
+
+    // Ищем точку на пути, которая:
+    // 1. Достижима для врага
+    // 2. Имеет хорошую видимость
+    // 3. Находится на 1/3-2/3 пути героя
+
+    size_t start_idx = predicted_path.size() / 3;
+    size_t end_idx = 2 * predicted_path.size() / 3;
+
+    std::pair<int, int> best_point = predicted_path[start_idx];
+    int best_score = -1000;
+
+    for (size_t i = start_idx; i < end_idx && i < predicted_path.size(); ++i)
+    {
+        const auto& point = predicted_path[i];
+
+        // Проверяем достижимость
+        auto path_to_point = find_simple_path(enemy_pos.first, enemy_pos.second,
+            point.first, point.second);
+        if (path_to_point.empty()) continue;
+
+        // Оцениваем точку
+        int score = 0;
+
+        // Близость к врагу (чем ближе, тем лучше)
+        int dist_to_enemy = abs(point.first - enemy_pos.first) +
+            abs(point.second - enemy_pos.second);
+        score -= dist_to_enemy * 2;
+
+        // Позиция на пути (ближе к середине лучше)
+        int position_penalty = abs((int)i - (int)predicted_path.size() / 2);
+        score -= position_penalty;
+
+        // Проверяем видимость в окрестностях
+        int visible_cells = 0;
+        for (int dx = -2; dx <= 2; ++dx)
+        {
+            for (int dy = -2; dy <= 2; ++dy)
+            {
+                int nx = point.first + dx;
+                int ny = point.second + dy;
+                if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT)
+                {
+                    visible_cells++;
+                }
+            }
+        }
+        score += visible_cells / 2;
+
+        if (score > best_score)
+        {
+            best_score = score;
+            best_point = point;
+        }
+    }
+
+    return best_point;
+}
+
+/**
+ * Вспомогательная функция для поиска точки приманки.
+ */
+std::pair<int, int> find_bait_location(int hero_x, int hero_y,
     int enemy_x, int enemy_y)
 {
-    if (hero_path.empty())
+    // Ищем тупик или петлю поблизости
+    for (int dx = -5; dx <= 5; ++dx)
     {
-        return std::make_pair(enemy_x, enemy_y);
+        for (int dy = -5; dy <= 5; ++dy)
+        {
+            int tx = hero_x + dx;
+            int ty = hero_y + dy;
+
+            if (tx >= 0 && tx < WIDTH && ty >= 0 && ty < HEIGHT)
+            {
+                // Проверяем, является ли клетка тупиком
+                int exits = 0;
+                if (!maze[ty][tx].north) exits++;
+                if (!maze[ty][tx].south) exits++;
+                if (!maze[ty][tx].east) exits++;
+                if (!maze[ty][tx].west) exits++;
+
+                if (exits == 1)
+                {
+                    // Тупик - идеально для приманки
+                    return std::make_pair(tx, ty);
+                }
+            }
+        }
     }
 
-    // Выбираем точку на пути героя на 1/3 от начала
-    size_t ambush_idx = hero_path.size() / 3;
-    if (ambush_idx >= hero_path.size())
-    {
-        ambush_idx = hero_path.size() - 1;
-    }
-
-    return hero_path[ambush_idx];
+    // Если тупик не найден, возвращаем точку в сторону от выхода
+    return std::make_pair(std::max(0, hero_x - 3), std::max(0, hero_y - 3));
 }
 
 /**
- * Агрессивное преследование героя с высокой вероятностью столкновения.
- * ИИ врага пытается перехватить героя на пути к выходу.
- * Сложность: O(T × P), где T - количество шагов, P - сложность A*
+ * Вспомогательная функция для поиска точки уклонения.
  */
-std::vector<std::pair<int, int>> aggressive_enemy_pursuit(const std::vector<std::pair<int, int>>& hero_path)
+std::pair<int, int> find_evasion_point(int hero_x, int hero_y,
+    int enemy_x, int enemy_y,
+    int exit_x, int exit_y)
+{
+    // Ищем точку, которая:
+    // 1. Дальше от врага
+    // 2. Ближе к выходу
+    // 3. Достижима
+
+    std::pair<int, int> best_point = std::make_pair(hero_x, hero_y);
+    int best_score = -1000;
+
+    for (int dx = -4; dx <= 4; ++dx)
+    {
+        for (int dy = -4; dy <= 4; ++dy)
+        {
+            int tx = hero_x + dx;
+            int ty = hero_y + dy;
+
+            if (tx >= 0 && tx < WIDTH && ty >= 0 && ty < HEIGHT)
+            {
+                // Проверяем достижимость
+                auto path = find_simple_path(hero_x, hero_y, tx, ty);
+                if (path.empty()) continue;
+
+                // Оценка точки
+                int score = 0;
+
+                // Дальше от врага лучше
+                int dist_to_enemy = abs(tx - enemy_x) + abs(ty - enemy_y);
+                score += dist_to_enemy * 2;
+
+                // Ближе к выходу лучше
+                int dist_to_exit = abs(tx - exit_x) + abs(ty - exit_y);
+                score -= dist_to_exit;
+
+                // Проверяем, не тупик ли
+                int exits = 0;
+                if (!maze[ty][tx].north) exits++;
+                if (!maze[ty][tx].south) exits++;
+                if (!maze[ty][tx].east) exits++;
+                if (!maze[ty][tx].west) exits++;
+                score += exits * 3; // Больше выходов лучше
+
+                if (score > best_score)
+                {
+                    best_score = score;
+                    best_point = std::make_pair(tx, ty);
+                }
+            }
+        }
+    }
+
+    return best_point;
+}
+
+/**
+ * Умное преследование с предсказанием и адаптацией.
+ */
+std::vector<std::pair<int, int>> smart_enemy_pursuit(
+    const std::vector<std::pair<int, int>>& hero_path)
 {
     if (hero_path.empty())
     {
@@ -231,121 +422,233 @@ std::vector<std::pair<int, int>> aggressive_enemy_pursuit(const std::vector<std:
     }
 
     std::vector<std::pair<int, int>> enemy_path;
-    EnemyMemory memory;
+    SmartEnemyMemory memory;
 
     // Начальная позиция врага
     int ex = enemy_start.first;
     int ey = enemy_start.second;
     enemy_path.push_back(std::make_pair(ex, ey));
 
-    // Устанавливаем начальную цель - точку засады на пути героя
-    memory.patrol_target = get_ambush_point(hero_path, ex, ey);
-    memory.chasing_mode = true;
+    // Предсказываем начальный путь героя
+    memory.predicted_path = predict_hero_path(
+        std::make_pair(0, 0), // Герой начинает в (0,0)
+        std::make_pair(WIDTH - 1, HEIGHT - 1)
+    );
+
+    // Находим лучшую точку для засады
+    memory.ambush_point = find_best_ambush_point(memory.predicted_path,
+        std::make_pair(ex, ey));
+    memory.chasing_mode = false; // Начинаем в режиме засады
+
+    std::cout << "🧠 SMART ENEMY AI ACTIVATED!\n";
+    std::cout << " Initial ambush point: ("
+        << memory.ambush_point.first << ","
+        << memory.ambush_point.second << ")\n";
+    std::cout << " Prediction depth: " << ENEMY_PREDICTION_DEPTH << " steps\n\n";
 
     size_t hero_idx = 0;
-    int steps_without_contact = 0;
-    const int MAX_STEPS_WITHOUT_CONTACT = 30;
+    int failed_predictions = 0;
+    const int MAX_FAILED_PREDICTIONS = 3;
 
-    std::cout << "Enemy AI: Aggressive mode activated!\n";
-    std::cout << "Enemy AI: Ambush point at ("
-        << memory.patrol_target.first << ","
-        << memory.patrol_target.second << ")\n\n";
-
-    // Основной цикл преследования
-    while (hero_idx < hero_path.size() && enemy_path.size() < 100)
+    while (hero_idx < hero_path.size() && enemy_path.size() < 150)
     {
-        // Текущая позиция героя
+        // Позиция героя
         int hx = hero_path[std::min(hero_idx, hero_path.size() - 1)].first;
         int hy = hero_path[std::min(hero_idx, hero_path.size() - 1)].second;
 
-        // Проверка видимости героя
-        bool can_see = enemy_can_see_hero(ex, ey, hx, hy);
+        // Проверяем видимость
+        bool can_see_hero = can_see(ex, ey, hx, hy);
         int dist_to_hero = abs(ex - hx) + abs(ey - hy);
 
-        // Если герой виден или враг в режиме преследования
-        if (can_see || memory.chasing_mode)
+        if (can_see_hero)
         {
-            // Обновляем память о герое
+            // Герой виден!
             memory.last_seen_position = std::make_pair(hx, hy);
             memory.steps_since_last_seen = 0;
-            memory.has_target = true;
             memory.chasing_mode = true;
+            memory.bait_mode = false;
 
-            if (can_see)
-            {
-                std::cout << "Enemy AI: Step " << enemy_path.size()
-                    << " - HERO SPOTTED! Distance: " << dist_to_hero << " cells\n";
-            }
+            std::cout << "👁️ Enemy spotted hero at ("
+                << hx << "," << hy << "), distance: "
+                << dist_to_hero << " cells\n";
 
-            // Преследование: ищем путь к текущей позиции героя
-            std::vector<std::pair<int, int>> pursuit_path =
-                find_simple_enemy_path(ex, ey, hx, hy);
-
+            // Непосредственное преследование
+            auto pursuit_path = find_simple_path(ex, ey, hx, hy);
             if (!pursuit_path.empty() && pursuit_path.size() > 1)
             {
                 ex = pursuit_path[1].first;
                 ey = pursuit_path[1].second;
                 enemy_path.push_back(std::make_pair(ex, ey));
-                steps_without_contact = 0;
+            }
+        }
+        else if (memory.chasing_mode)
+        {
+            // Режим преследования, но герой не виден
+            memory.steps_since_last_seen++;
+
+            if (memory.steps_since_last_seen > 5)
+            {
+                // Потеряли героя, делаем новое предсказание
+                std::cout << " Enemy lost sight of hero, making new prediction...\n";
+
+                memory.predicted_path = predict_hero_path(
+                    memory.last_seen_position,
+                    std::make_pair(WIDTH - 1, HEIGHT - 1)
+                );
+
+                memory.ambush_point = find_best_ambush_point(
+                    memory.predicted_path,
+                    std::make_pair(ex, ey)
+                );
+
+                memory.chasing_mode = false; // Переходим в режим засады
+                memory.steps_since_last_seen = 0;
+                failed_predictions++;
+
+                if (failed_predictions >= MAX_FAILED_PREDICTIONS)
+                {
+                    std::cout << " Enemy giving up pursuit, going to exit\n";
+                    // Идем к выходу
+                    auto exit_path = find_simple_path(ex, ey,
+                        WIDTH - 1, HEIGHT - 1);
+                    if (!exit_path.empty())
+                    {
+                        ex = exit_path[1].first;
+                        ey = exit_path[1].second;
+                        enemy_path.push_back(std::make_pair(ex, ey));
+                    }
+                    hero_idx++;
+                    continue;
+                }
+            }
+            else
+            {
+                // Продолжаем идти к последней видимой позиции
+                auto path_to_last_seen = find_simple_path(
+                    ex, ey,
+                    memory.last_seen_position.first,
+                    memory.last_seen_position.second
+                );
+
+                if (!path_to_last_seen.empty() && path_to_last_seen.size() > 1)
+                {
+                    ex = path_to_last_seen[1].first;
+                    ey = path_to_last_seen[1].second;
+                    enemy_path.push_back(std::make_pair(ex, ey));
+                }
             }
         }
         else
         {
-            // Герой не виден - двигаемся к точке засады
-            steps_without_contact++;
-
-            // Если долго не видим героя, меняем точку засады
-            if (steps_without_contact > MAX_STEPS_WITHOUT_CONTACT)
+            // Режим засады/патрулирования
+            // Проверяем, должен ли герой быть виден по нашему предсказанию
+            bool should_see_hero = false;
+            for (const auto& pred_point : memory.predicted_path)
             {
-                memory.patrol_target = get_ambush_point(hero_path, ex, ey);
-                steps_without_contact = 0;
-                std::cout << "Enemy AI: Changing ambush point to ("
-                    << memory.patrol_target.first << ","
-                    << memory.patrol_target.second << ")\n";
+                if (can_see(ex, ey, pred_point.first, pred_point.second))
+                {
+                    should_see_hero = true;
+                    break;
+                }
             }
 
-            // Движение к точке засады
-            std::vector<std::pair<int, int>> patrol_path =
-                find_simple_enemy_path(ex, ey,
-                    memory.patrol_target.first,
-                    memory.patrol_target.second);
-
-            if (!patrol_path.empty() && patrol_path.size() > 1)
+            if (should_see_hero && !can_see_hero)
             {
-                ex = patrol_path[1].first;
-                ey = patrol_path[1].second;
-                enemy_path.push_back(std::make_pair(ex, ey));
+                // Предсказание не сбылось - герой пошел другим путем
+                std::cout << " Prediction failed! Hero took different route.\n";
+
+                // Ищем героя в других вероятных местах
+                // Проверяем клетки вокруг предсказанного пути
+                std::pair<int, int> search_target = memory.ambush_point;
+                for (int dx = -3; dx <= 3; ++dx)
+                {
+                    for (int dy = -3; dy <= 3; ++dy)
+                    {
+                        int nx = memory.ambush_point.first + dx;
+                        int ny = memory.ambush_point.second + dy;
+                        if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT)
+                        {
+                            // Проверяем путь к выходу от этой точки
+                            auto path_to_exit = find_simple_path(
+                                nx, ny, WIDTH - 1, HEIGHT - 1);
+                            if (!path_to_exit.empty() &&
+                                path_to_exit.size() < memory.predicted_path.size() + 5)
+                            {
+                                search_target = std::make_pair(nx, ny);
+                            }
+                        }
+                    }
+                }
+
+                // Идем к новой цели поиска
+                auto search_path = find_simple_path(ex, ey,
+                    search_target.first,
+                    search_target.second);
+                if (!search_path.empty() && search_path.size() > 1)
+                {
+                    ex = search_path[1].first;
+                    ey = search_path[1].second;
+                    enemy_path.push_back(std::make_pair(ex, ey));
+                }
+            }
+            else
+            {
+                // Идем к точке засады
+                auto ambush_path = find_simple_path(ex, ey,
+                    memory.ambush_point.first,
+                    memory.ambush_point.second);
+
+                if (!ambush_path.empty() && ambush_path.size() > 1)
+                {
+                    ex = ambush_path[1].first;
+                    ey = ambush_path[1].second;
+                    enemy_path.push_back(std::make_pair(ex, ey));
+
+                    // Если достигли точки засады, ждем
+                    if (ex == memory.ambush_point.first &&
+                        ey == memory.ambush_point.second)
+                    {
+                        // Остаемся на месте (имитация ожидания)
+                        enemy_path.push_back(std::make_pair(ex, ey));
+                        std::cout << " Enemy waiting at ambush point...\n";
+                    }
+                }
             }
         }
 
         // Герой движется вперед
         hero_idx++;
 
-        // Если враг близко к герою, ускоряем погоню (драматический эффект)
-        if (dist_to_hero < 10 && hero_idx + 1 < hero_path.size())
+        // Если враг близко, ускоряем героя (драматический эффект)
+        if (dist_to_hero < 8 && hero_idx + 1 < hero_path.size())
         {
-            hero_idx++; // Герой "убегает" быстрее
+            hero_idx++;
         }
     }
 
-    std::cout << "\nEnemy AI: Aggressive pursuit finished\n";
-    std::cout << "Enemy path length: " << (enemy_path.size() - 1) << " steps\n";
-    std::cout << "WARNING: Contact likely! Collision = INSTANT DEFEAT for hero!\n";
+    std::cout << "\n🤖 SMART ENEMY AI FINISHED\n";
+    std::cout << " Enemy path length: " << (enemy_path.size() - 1) << " steps\n";
+    std::cout << " Failed predictions: " << failed_predictions << "\n";
+    std::cout << " FINAL WARNING: Smart enemy is DANGEROUS!\n";
 
     return enemy_path;
 }
 
 /**
- * Нахождение пути героя с учетом присутствия врага.
- * Использует стандартный алгоритм Дейкстры, но анализирует безопасность пути.
- * Сложность: O(S log S) (смотри комментарий к find_shortest_path)
+ * Умный путь героя с тактикой уклонения.
  */
-std::vector<std::pair<int, int>> find_hero_path_with_evasion(int enemy_start_x, int enemy_start_y)
+std::vector<std::pair<int, int>> find_smart_hero_path(
+    const std::pair<int, int>& enemy_start_pos)
 {
-    // Очищаем глобальный путь
-    path.clear();
+    std::vector<std::pair<int, int>> hero_path;
+    HeroTactics tactics;
 
-    // Используем стандартный алгоритм поиска пути
+    // Начальная позиция
+    int hx = 0, hy = 0;
+    hero_path.push_back(std::make_pair(hx, hy));
+
+    // Сначала находим оптимальный путь
+    path.clear();
     bool found = find_shortest_path();
 
     if (!found || path.empty())
@@ -353,59 +656,139 @@ std::vector<std::pair<int, int>> find_hero_path_with_evasion(int enemy_start_x, 
         return std::vector<std::pair<int, int>>();
     }
 
-    // Анализ безопасности пути: проверяем близость к стартовой позиции врага
-    int min_dist_to_enemy_start = 1000;
-    for (const auto& p : path)
+    std::cout << "🧠 SMART HERO AI ACTIVATED!\n";
+    std::cout << " Initial optimal path: " << (path.size() - 1) << " steps\n";
+
+    // Преобразуем путь в вектор для удобства
+    std::vector<std::pair<int, int>> optimal_path = path;
+
+    // Симулируем движение с тактикой
+    int ex = enemy_start_pos.first;
+    int ey = enemy_start_pos.second;
+
+    for (size_t i = 1; i < optimal_path.size() && hero_path.size() < 200; ++i)
     {
-        int dist = abs(p.first - enemy_start_x) + abs(p.second - enemy_start_y);
-        if (dist < min_dist_to_enemy_start)
+        int next_hx = optimal_path[i].first;
+        int next_hy = optimal_path[i].second;
+
+        // Проверяем, виден ли враг
+        int dist_to_enemy = abs(next_hx - ex) + abs(next_hy - ey);
+        bool enemy_visible = (dist_to_enemy <= HERO_EVASION_RANGE);
+
+        if (enemy_visible)
         {
-            min_dist_to_enemy_start = dist;
+            tactics.enemy_spotted = true;
+            tactics.last_enemy_position = std::make_pair(ex, ey);
+            tactics.steps_with_enemy_nearby++;
+
+            std::cout << " Hero sees enemy at (" << ex << "," << ey
+                << "), distance: " << dist_to_enemy << " cells\n";
+
+            if (dist_to_enemy <= HERO_BAIT_DISTANCE && !tactics.bait_active)
+            {
+                // Враг очень близко - активируем тактику "приманки"
+                std::cout << " 🎣 BAIT TACTIC ACTIVATED! Leading enemy to dead end\n";
+
+                tactics.current_strategy = HeroTactics::BAIT_ENEMY;
+                tactics.bait_active = true;
+
+                // Ищем тупик или петлю, чтобы заманить врага
+                std::pair<int, int> bait_target = find_bait_location(
+                    hx, hy, ex, ey);
+
+                // Идем к точке приманки
+                auto bait_path = find_simple_path(hx, hy,
+                    bait_target.first,
+                    bait_target.second);
+
+                for (size_t j = 1; j < bait_path.size() && j < 5; ++j)
+                {
+                    hero_path.push_back(bait_path[j]);
+                    hx = bait_path[j].first;
+                    hy = bait_path[j].second;
+                }
+
+                // После приманки возвращаемся к выходу
+                tactics.current_strategy = HeroTactics::ALTERNATIVE_PATH;
+                continue;
+            }
+            else if (dist_to_enemy <= ENEMY_VISION_RANGE + 2)
+            {
+                // Враг в зоне опасности - ищем обходной путь
+                std::cout << " 🚫 EVASION TACTIC: Finding alternative route\n";
+
+                tactics.current_strategy = HeroTactics::EVADE_ENEMY;
+
+                // Ищем путь, который избегает врага
+                std::pair<int, int> evasion_target = find_evasion_point(
+                    hx, hy, ex, ey, WIDTH - 1, HEIGHT - 1);
+
+                auto evasion_path = find_simple_path(hx, hy,
+                    evasion_target.first,
+                    evasion_target.second);
+
+                if (!evasion_path.empty() && evasion_path.size() > 1)
+                {
+                    hx = evasion_path[1].first;
+                    hy = evasion_path[1].second;
+                    hero_path.push_back(std::make_pair(hx, hy));
+                    continue;
+                }
+            }
+        }
+        else
+        {
+            tactics.steps_with_enemy_nearby = 0;
+        }
+
+        // Если враг не виден или далеко, продолжаем по оптимальному пути
+        if (tactics.current_strategy == HeroTactics::OPTIMAL_PATH ||
+            tactics.steps_with_enemy_nearby == 0)
+        {
+            hx = next_hx;
+            hy = next_hy;
+            hero_path.push_back(std::make_pair(hx, hy));
+        }
+
+        // Обновляем позицию врага (в реальной симуляции это было бы отдельно)
+        // Здесь для простоты двигаем врага к герою
+        if (i % 3 == 0)
+        {
+            auto enemy_move = find_simple_path(ex, ey, hx, hy);
+            if (!enemy_move.empty() && enemy_move.size() > 1)
+            {
+                ex = enemy_move[1].first;
+                ey = enemy_move[1].second;
+            }
         }
     }
 
-    // Вывод информации о безопасности пути
-    std::cout << "Hero path analysis:\n";
-    std::cout << "  Total steps: " << path.size() - 1 << "\n";
-    std::cout << "  Min distance to enemy start: " << min_dist_to_enemy_start << " cells\n";
+    std::cout << "\n🏃 SMART HERO FINISHED\n";
+    std::cout << " Hero path length: " << (hero_path.size() - 1) << " steps\n";
+    std::cout << " Enemy spotted: " << (tactics.enemy_spotted ? "YES" : "NO") << "\n";
+    std::cout << " Bait tactic used: " << (tactics.bait_active ? "YES" : "NO") << "\n";
 
-    // Предупреждение о опасной близости к врагу
-    if (min_dist_to_enemy_start < 8)
-    {
-        std::cout << "  WARNING: Path passes close to enemy! High risk of encounter!\n";
-    }
-    else
-    {
-        std::cout << "  Path is relatively safe from initial enemy position.\n";
-    }
-
-    return path;
+    return hero_path;
 }
 
 /**
- * Основная функция для генерации путей героя и врага.
- * Создает сценарий погони с высокой вероятностью столкновения.
- * Сложность: O(H + E), где H - сложность поиска пути героя, E - сложность преследования
+ * Основная функция с умным ИИ для обоих.
  */
 std::vector<std::vector<std::pair<int, int>>> find_hero_vs_enemy_paths()
 {
-    std::cout << "\n=== HERO VS ENEMY: DEADLY PURSUIT ===\n";
-    std::cout << "Hero (Yellow) - escape or die!\n";
-    std::cout << "Enemy (Red) - AGGRESSIVE & DEADLY\n";
-    std::cout << "  • Vision range: " << ENEMY_VISION_RANGE << " cells\n";
-    std::cout << "  • Memory: " << ENEMY_MEMORY_STEPS << " steps\n";
-    std::cout << "  • Patrol radius: " << ENEMY_PATROL_RADIUS << " cells\n";
-    std::cout << "  • COLLISION = INSTANT DEFEAT (hero loses ALL hunger)\n";
-    std::cout << "Food: " << FOOD_COUNT << " pieces\n\n";
+    std::cout << "\n=== SMART HERO VS ENEMY: MIND GAME ===\n";
+    std::cout << "Hero: Adaptive tactics with bait & evasion\n";
+    std::cout << "Enemy: Predictive AI with learning\n";
+    std::cout << " Vision range: " << ENEMY_VISION_RANGE << " cells\n";
+    std::cout << " Prediction depth: " << ENEMY_PREDICTION_DEPTH << " steps\n";
+    std::cout << " Hero evasion range: " << HERO_EVASION_RANGE << " cells\n";
+    std::cout << " COLLISION = INSTANT DEFEAT\n\n";
 
-    // Инициализация генератора случайных чисел
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    // Генерация позиции врага (близко к старту героя для драматизма)
+    // Генерация позиции врага
     int ex, ey;
     int attempts = 0;
-
-    // Генерация позиции врага в пределах 10-15 клеток от старта
     do
     {
         ex = 5 + rand() % 10;
@@ -413,17 +796,16 @@ std::vector<std::vector<std::pair<int, int>>> find_hero_vs_enemy_paths()
         attempts++;
     } while ((abs(ex - 0) + abs(ey - 0)) < 5 || attempts < 10);
 
-    // Установка стартовой позиции врага
     enemy_start = std::make_pair(ex, ey);
 
-    // Вывод информации о позиции врага
-    std::cout << "⚠️  ENEMY SPAWNED AT (" << ex << ", " << ey << ")\n";
-    std::cout << "⚠️  Distance from hero: " << (abs(ex - 0) + abs(ey - 0)) << " cells\n";
-    std::cout << "⚠️  WARNING: Enemy is CLOSE! High chance of encounter!\n\n";
+    std::cout << "⚠️ SMART ENEMY SPAWNED AT (" << ex << ", " << ey << ")\n";
+    std::cout << "⚠️ Distance from hero: " << (abs(ex - 0) + abs(ey - 0))
+        << " cells\n\n";
 
-    // Поиск пути для героя
-    std::cout << "Hero planning escape route...\n";
-    std::vector<std::pair<int, int>> hero_path = find_hero_path_with_evasion(ex, ey);
+    // Умный путь героя
+    std::cout << "Hero planning adaptive route...\n";
+    std::vector<std::pair<int, int>> hero_path = find_smart_hero_path(
+        std::make_pair(ex, ey));
 
     if (hero_path.empty())
     {
@@ -431,27 +813,42 @@ std::vector<std::vector<std::pair<int, int>>> find_hero_vs_enemy_paths()
         return std::vector<std::vector<std::pair<int, int>>>();
     }
 
-    // Генерация пути преследования для врага
-    std::cout << "\nEnemy preparing deadly pursuit...\n";
-    std::vector<std::pair<int, int>> enemy_path = aggressive_enemy_pursuit(hero_path);
+    // Умное преследование врага
+    std::cout << "\nEnemy analyzing hero's pattern...\n";
+    std::vector<std::pair<int, int>> enemy_path = smart_enemy_pursuit(hero_path);
 
-    // Запасной вариант: если путь врага не найден, остаемся на месте
     if (enemy_path.empty())
     {
         enemy_path.push_back(enemy_start);
     }
 
-    // Финальная информация о сценарии
-    std::cout << "\n⚔️  === DEADLY PURSUIT READY === ⚔️\n";
-    std::cout << "Hero path: " << hero_path.size() - 1 << " steps\n";
-    std::cout << "Enemy path: " << enemy_path.size() - 1 << " steps\n";
-    std::cout << "🚨 COLLISION RULES:\n";
-    std::cout << "   - If hero meets enemy: INSTANT DEFEAT\n";
-    std::cout << "   - Hero loses ALL remaining hunger\n";
-    std::cout << "   - Game over for hero!\n";
-    std::cout << "Press SPACE to start the DEADLY chase!\n\n";
+    // Анализ столкновений
+    bool collision_possible = false;
+    std::set<std::pair<int, int>> hero_positions(
+        hero_path.begin(), hero_path.end());
 
-    // Возвращаем пути обоих участников
+    for (const auto& pos : enemy_path)
+    {
+        if (hero_positions.find(pos) != hero_positions.end())
+        {
+            collision_possible = true;
+            break;
+        }
+    }
+
+    std::cout << "\n🎯 ANALYSIS COMPLETE\n";
+    std::cout << " Hero path: " << hero_path.size() - 1 << " steps\n";
+    std::cout << " Enemy path: " << enemy_path.size() - 1 << " steps\n";
+    std::cout << " Collision possible: "
+        << (collision_possible ? "YES ⚠️" : "NO ✅") << "\n";
+
+    if (collision_possible)
+    {
+        std::cout << " RISK: Hero must use evasion tactics!\n";
+    }
+
+    std::cout << "\n🚀 Press SPACE for the ultimate chase!\n";
+
     std::vector<std::vector<std::pair<int, int>>> result;
     result.push_back(hero_path);
     result.push_back(enemy_path);

@@ -1,13 +1,23 @@
-﻿#include "generate_maze.hpp"
+﻿#include "generate_maze.hpp"          // Здесь уже есть все константы!
 #include "dijkstra_search.hpp"
 #include "multi_agent_predictive.hpp"
-#include "hero_vs_enemy_real.hpp"
+#include "hero_vs_enemy_real.hpp"       // Panic Mode (оригинальный с багами)
+#include "hero_vs_enemy_fixed.hpp"      // Fixed Mode (исправленный)
 #include "visualization.hpp"
-#include "genetic_evolution.hpp"  // Теперь здесь нейросеть!
+#include "genetic_evolution.hpp"        // Нейросеть
 #include <SFML/Graphics.hpp>
+#include <iomanip>
 #ifdef _WIN32
 #include <windows.h>
 #endif
+
+// const int WIDTH = 20;
+// const int HEIGHT = 20;
+// const int CELL_SIZE = 30;
+// const int INITIAL_HUNGER = 20;
+// const int FOOD_RESTORE = 5;
+// const int HUNGER_COST_PER_STEP = 1;
+// const int FOOD_COUNT = 8;
 
 // Глобальные переменные, определенные в других файлах
 std::vector<std::vector<Cell>> maze(HEIGHT, std::vector<Cell>(WIDTH));
@@ -18,15 +28,6 @@ std::vector<std::vector<std::pair<int, int>>> multi_agent_paths;
 
 /**
  * Функция поиска пути в зависимости от выбранного режима работы.
- *
- * @param mode Режим работы (1-5)
- * @return true если путь(и) найдены успешно, false в противном случае
- *
- * Сложность: Зависит от выбранного алгоритма:
- *  - Режим 1: O(S log S) - алгоритм Дейкстры
- *  - Режим 2: O(2 × A*) - два независимых агента
- *  - Режим 3: O(D + P) - Дейкстра + преследование
- *  - Режим 4,5: O(N) - нейронная сеть (быстрее но требует обучения)
  */
 bool find_path_with_mode(int mode)
 {
@@ -44,20 +45,37 @@ bool find_path_with_mode(int mode)
         return !multi_agent_paths.empty() && !multi_agent_paths[0].empty();
 
     case 3:
-        std::cout << "Algorithm: Hero vs Enemy (pursuit mode)\n";
+        std::cout << "Algorithm: HERO VS ENEMY - PANIC MODE 😱\n";
+        std::cout << "🚨🚨🚨 ВНИМАНИЕ: ПСИХИЧЕСКИ НЕУРАВНОВЕШЕННЫЙ ГЕРОЙ! 🚨🚨🚨\n";
+        std::cout << "⚠️  Особенности режима 'Паническая атака':\n";
+        std::cout << "   • Герой может ТЕЛЕПОРТИРОВАТЬСЯ по желанию левой пятки\n";
+        std::cout << "   • Стратегия: 'Беги туда, не знаю куда'\n";
+        std::cout << "   • Шанс на выживание: ???\n";
+        std::cout << "   • Развлечение гарантировано! 😂\n\n";
+
         multi_agent_paths = find_hero_vs_enemy_paths();
         return !multi_agent_paths.empty() && !multi_agent_paths[0].empty();
 
     case 4:
-        // Используем функцию из genetic_evolution.hpp (которая теперь содержит нейросеть)
-        std::cout << "Algorithm: Neural Network Pathfinding\n";
-        path = find_path_weighted_neural(false); // false = обучить новую
+        std::cout << "Algorithm: Neural Network Pathfinding (Train new)\n";
+        path = find_path_weighted_neural(false);
         return !path.empty();
 
     case 5:
-        std::cout << "Algorithm: Neural Network (load trained)\n";
-        path = find_path_weighted_neural(true); // true = загрузить сохраненную
+        std::cout << "Algorithm: Neural Network (Load trained)\n";
+        path = find_path_weighted_neural(true);
         return !path.empty();
+
+    case 6:
+        std::cout << "Algorithm: HERO VS ENEMY - FIXED MODE 🧠\n";
+        std::cout << "🎯 Режим 'Стратегическое противостояние':\n";
+        std::cout << "   • Герой использует разумную тактику\n";
+        std::cout << "   • НИКАКОЙ ТЕЛЕПОРТАЦИИ!\n";
+        std::cout << "   • Реалистичное преследование\n";
+        std::cout << "   • Для серьёзных игроков\n\n";
+
+        multi_agent_paths = find_hero_vs_enemy_paths_fixed();
+        return !multi_agent_paths.empty() && !multi_agent_paths[0].empty();
 
     default:
         std::cout << "Invalid mode, using Dijkstra (mode 1)\n";
@@ -65,14 +83,9 @@ bool find_path_with_mode(int mode)
     }
 }
 
+
 /**
  * Запуск анимации для одного агента.
- * Используется в режимах 1, 4, 5.
- *
- * @param window Окно SFML для отрисовки
- * @param maze Лабиринт
- * @param path Путь для анимации
- * @param font Шрифт для отображения информации
  */
 void run_single_agent_animation(sf::RenderWindow& window,
     const std::vector<std::vector<Cell>>& maze,
@@ -84,15 +97,6 @@ void run_single_agent_animation(sf::RenderWindow& window,
 
 /**
  * Запуск анимации для нескольких агентов.
- * Используется в режимах 2 и 3.
- *
- * @param window Окно SFML для отрисовки
- * @param maze Лабиринт
- * @param paths Вектор путей для каждого агента
- * @param font Шрифт для отображения информации
- * @param current_mode Текущий режим работы (2 или 3)
- *
- * Сложность: O(F × A × P), где F - частота кадров, A - количество агентов, P - длина пути
  */
 void run_multi_agent_animation(sf::RenderWindow& window,
     const std::vector<std::vector<Cell>>& maze,
@@ -109,110 +113,131 @@ void run_multi_agent_animation(sf::RenderWindow& window,
     std::cout << "\n=== MULTI-AGENT ANIMATION STARTED ===\n";
     std::cout << "Number of agents: " << paths.size() << "\n";
 
-    // Информация о режиме
-    if (current_mode == 3)
+    // Особые сообщения для разных режимов
+    if (current_mode == 3)  // Panic Mode
     {
-        std::cout << "MODE: Hero vs Enemy (Yellow = Hero, Red = Enemy)\n";
-        std::cout << "Hero starts at: (0, 0)\n";
-        std::cout << "Enemy starts at: (" << enemy_start.first << ", " << enemy_start.second << ")\n";
-        std::cout << "🚨 COLLISION RULES: Instant defeat for hero!\n";
+        std::cout << "🎭 MODE: PANIC MODE - PSYCHOLOGICAL THRILLER!\n";
+        std::cout << "👤 Hero: Paranoid schizophrenic (YELLOW)\n";
+        std::cout << "👹 Enemy: Calm hunter (RED)\n";
+        std::cout << "💊 Symptoms: Random teleportation, panic attacks\n";
+        std::cout << "🏥 Prognosis: Likely self-destruction\n\n";
+
+        std::cout << "=== MEDICAL WARNING ===\n";
+        std::cout << "The hero suffers from:\n";
+        std::cout << "1. Acute Paranoia\n";
+        std::cout << "2. Teleportation Disorder\n";
+        std::cout << "3. Strategy Deficiency Syndrome\n";
+        std::cout << "4. Chronic Panic Attacks\n";
+        std::cout << "========================\n\n";
+    }
+    else if (current_mode == 6)  // Fixed Mode
+    {
+        std::cout << "🧠 MODE: STRATEGIC PURSUIT - MIND GAME\n";
+        std::cout << "👑 Hero: Strategic thinker (GOLD)\n";
+        std::cout << "👿 Enemy: Persistent hunter (DARK RED)\n";
+        std::cout << "🎯 Goal: Outsmart the opponent\n";
+        std::cout << "⚔️  Rules: Collision = instant defeat\n\n";
+    }
+    else if (current_mode == 2)
+    {
+        std::cout << "MODE: Two Agents Cooperation\n";
     }
 
-    // Вывод информации о путях каждого агента
+    std::cout << "Hero starts at: (0, 0)\n";
+    std::cout << "Enemy starts at: (" << enemy_start.first << ", " << enemy_start.second << ")\n";
+
+    if (current_mode == 3 || current_mode == 6)
+    {
+        std::cout << "⚔️  COLLISION RULES: Instant defeat for hero!\n";
+    }
+
     for (size_t i = 0; i < paths.size(); i++)
     {
         std::cout << "Agent " << i << " path length: "
             << (paths[i].empty() ? 0 : paths[i].size() - 1) << " steps\n";
-        if (!paths[i].empty())
-        {
-            std::cout << "  Starts at: (" << paths[i][0].first << ", " << paths[i][0].second << ")\n";
-        }
     }
 
-    std::cout << "Press ESC to stop animation\n\n";
+    std::cout << "\nPress ESC to stop animation\n";
+    std::cout << "Press P to pause/resume\n\n";
 
-    // Структура данных для хранения состояния анимации каждого агента
     struct AgentAnimationData
     {
-        float progress = 0.0f;      // Текущий прогресс анимации (в шагах)
-        int current_step = 0;       // Текущий шаг пути
-        int current_hunger = INITIAL_HUNGER; // Текущий уровень голода
-        int total_points = 0;       // Накопленные очки
-        int food_eaten = 0;         // Количество съеденной еды
-        bool alive = true;          // Агент жив
-        bool finished = false;      // Агент достиг цели
-        int start_x = 0;            // Стартовая позиция X
-        int start_y = 0;            // Стартовая позиция Y
+        float progress = 0.0f;
+        int current_step = 0;
+        int current_hunger = INITIAL_HUNGER;
+        int total_points = 0;
+        int food_eaten = 0;
+        bool alive = true;
+        bool finished = false;
     };
 
-    // Инициализация данных для каждого агента
     std::vector<AgentAnimationData> agents_data(paths.size());
 
-    // Установка стартовых позиций агентов
-    for (size_t i = 0; i < paths.size(); i++)
-    {
-        if (!paths[i].empty())
-        {
-            agents_data[i].start_x = paths[i][0].first;
-            agents_data[i].start_y = paths[i][0].second;
-        }
-    }
-
-    // Выбор цветов агентов в зависимости от режима
+    // Цвета агентов в зависимости от режима
     std::vector<sf::Color> agent_colors;
-    if (current_mode == 3)
+    if (current_mode == 3)  // Panic Mode
     {
-        agent_colors = { sf::Color::Yellow, sf::Color::Red }; // Герой и враг
+        agent_colors = { sf::Color(255, 255, 0),    // Герой - ярко-жёлтый (паникёр)
+                         sf::Color(255, 0, 0) };    // Враг - красный
+    }
+    else if (current_mode == 6)  // Fixed Mode
+    {
+        agent_colors = { sf::Color(255, 215, 0),    // Герой - золотой (король)
+                         sf::Color(139, 0, 0) };    // Враг - тёмно-красный
     }
     else
     {
         agent_colors = { sf::Color::Yellow, sf::Color::Cyan,
-                        sf::Color::Magenta, sf::Color::Green }; // Разные цвета
+                        sf::Color::Magenta, sf::Color::Green };
     }
 
-    // Состояние еды в лабиринте
-    std::vector<bool> food_available(FOOD_COUNT, true);   // Доступна ли еда
-    std::vector<int> food_eaten_by(FOOD_COUNT, -1);       // Кто съел еду
+    std::vector<bool> food_available(FOOD_COUNT, true);
+    std::vector<int> food_eaten_by(FOOD_COUNT, -1);
 
-    // Заголовок таблицы пошаговой информации
+    // Заголовок таблицы
     std::cout << std::left << std::setw(6) << "STEP";
-    std::cout << std::setw(8) << "AGENT";
-    std::cout << std::setw(12) << "POSITION";
+    std::cout << std::setw(12) << "AGENT";
+    std::cout << std::setw(15) << "POSITION";
     std::cout << std::setw(10) << "HUNGER";
     std::cout << std::setw(8) << "FOOD";
     std::cout << std::setw(12) << "POINTS";
     std::cout << "ACTION\n";
     std::cout << std::string(70, '-') << "\n";
 
-    // Переменные управления анимацией
     bool animating = true;
+    bool paused = false;
     sf::Clock clock;
-    bool collision_occurred = false; // Флаг столкновения для режима 3
+    bool collision_occurred = false;
 
-    // Главный цикл анимации
     while (animating && window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
         {
-            // Обработка закрытия окна
             if (event.type == sf::Event::Closed)
             {
                 window.close();
                 return;
             }
-            // Остановка анимации по нажатию ESC
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+            if (event.type == sf::Event::KeyPressed)
             {
-                animating = false;
-                std::cout << "\nAnimation stopped by user\n";
+                if (event.key.code == sf::Keyboard::Escape)
+                {
+                    animating = false;
+                    std::cout << "\nAnimation stopped by user\n";
+                }
+                else if (event.key.code == sf::Keyboard::P)
+                {
+                    paused = !paused;
+                    std::cout << (paused ? "\nAnimation PAUSED\n" : "\nAnimation RESUMED\n");
+                }
             }
         }
 
-        // Вычисление времени между кадрами
+        if (paused) continue;
+
         float delta_time = clock.restart().asSeconds();
 
-        // Обновление состояния всех агентов
         for (size_t agent_id = 0; agent_id < paths.size(); agent_id++)
         {
             if (paths[agent_id].empty()) continue;
@@ -221,11 +246,8 @@ void run_multi_agent_animation(sf::RenderWindow& window,
             if (!data.alive || data.finished) continue;
 
             const auto& agent_path = paths[agent_id];
-
-            // Увеличение прогресса анимации (скорость 2 шага в секунду)
             data.progress += delta_time * 2.0f;
 
-            // Проверка достижения конечной точки
             if (data.progress >= agent_path.size() - 1)
             {
                 data.progress = agent_path.size() - 1;
@@ -233,7 +255,6 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                 std::cout << "Agent " << agent_id << " reached destination\n";
             }
 
-            // Обработка перехода на новый шаг
             int step = static_cast<int>(data.progress + 0.01f);
             if (step > data.current_step && step < static_cast<int>(agent_path.size()))
             {
@@ -242,11 +263,10 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                 int cy = agent_path[step].second;
                 std::string action = "move";
 
-                // Проверка сбора еды (только для героя в режиме 3)
+                // Проверка сбора еды (только для героя в режиме 3 и 6)
                 bool ate_food = false;
-                if (current_mode != 3 || agent_id == 0)
+                if (current_mode != 3 && current_mode != 6 || agent_id == 0)
                 {
-                    // Поиск еды в текущей позиции
                     for (size_t i = 0; i < food_locations.size(); ++i)
                     {
                         if (food_available[i] &&
@@ -260,22 +280,20 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                             food_available[i] = false;
                             food_eaten_by[i] = agent_id;
                             ate_food = true;
-                            action = "+" + std::to_string(FOOD_RESTORE) + " hunger";
+                            action = "+" + std::to_string(FOOD_RESTORE) + " food";
                             break;
                         }
                     }
                 }
 
-                // Обработка движения (не для начальной позиции)
+                // Движение и голод
                 if (step > 0)
                 {
-                    // Для героя в режиме 3 и всех в других режимах
-                    if (current_mode != 3 || agent_id == 0)
+                    if (current_mode != 3 && current_mode != 6 || agent_id == 0)
                     {
                         data.current_hunger -= HUNGER_COST_PER_STEP;
                         data.total_points += maze[cy][cx].cost;
 
-                        // Проверка смерти от голода
                         if (data.current_hunger <= 0)
                         {
                             data.alive = false;
@@ -286,14 +304,26 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                 }
                 else
                 {
-                    // Начальный шаг
-                    action = "START at (" + std::to_string(cx) + "," + std::to_string(cy) + ")";
+                    action = "START";
                 }
 
-                // Вывод информации о шаге в таблицу
+                // Вывод в таблицу
                 std::cout << std::left << std::setw(6) << step;
-                std::cout << std::setw(8) << agent_id;
-                std::cout << std::setw(12) << ("(" + std::to_string(cx) + "," + std::to_string(cy) + ")");
+
+                if (current_mode == 3)
+                {
+                    std::cout << std::setw(12) << (agent_id == 0 ? "PANIC_HERO" : "ENEMY");
+                }
+                else if (current_mode == 6)
+                {
+                    std::cout << std::setw(12) << (agent_id == 0 ? "HERO" : "ENEMY");
+                }
+                else
+                {
+                    std::cout << std::setw(12) << ("Agent " + std::to_string(agent_id));
+                }
+
+                std::cout << std::setw(15) << ("(" + std::to_string(cx) + "," + std::to_string(cy) + ")");
                 std::cout << std::setw(10) << data.current_hunger;
                 std::cout << std::setw(8) << (ate_food ? "YES" : "NO");
                 std::cout << std::setw(12) << data.total_points;
@@ -301,19 +331,18 @@ void run_multi_agent_animation(sf::RenderWindow& window,
             }
         }
 
-        // Проверка столкновений для режима "Герой vs Враг"
-        if (current_mode == 3 && paths.size() >= 2 && !collision_occurred)
+        // Проверка столкновений
+        if ((current_mode == 3 || current_mode == 6) &&
+            paths.size() >= 2 && !collision_occurred)
         {
             auto& hero = agents_data[0];
             auto& enemy = agents_data[1];
 
-            // Проверка, если оба агента живы и не закончили путь
             if (hero.alive && enemy.alive && !hero.finished && !enemy.finished)
             {
                 int hero_idx = static_cast<int>(hero.progress);
                 int enemy_idx = static_cast<int>(enemy.progress);
 
-                // Проверка что индексы в пределах массива
                 if (hero_idx < paths[0].size() && enemy_idx < paths[1].size())
                 {
                     int hx = paths[0][hero_idx].first;
@@ -321,7 +350,6 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                     int ex = paths[1][enemy_idx].first;
                     int ey = paths[1][enemy_idx].second;
 
-                    // Проверка совпадения позиций
                     if (hx == ex && hy == ey)
                     {
                         hero.current_hunger = 0;
@@ -337,7 +365,7 @@ void run_multi_agent_animation(sf::RenderWindow& window,
             }
         }
 
-        // Проверка завершения анимации (все агенты закончили или умерли)
+        // Проверка завершения
         bool all_finished = true;
         for (size_t i = 0; i < paths.size(); i++)
         {
@@ -348,39 +376,30 @@ void run_multi_agent_animation(sf::RenderWindow& window,
             }
         }
 
-        // Если анимация завершена, выводим итоговую статистику
         if (all_finished)
         {
             animating = false;
             std::cout << "\n=== ANIMATION FINISHED ===\n";
 
-            // Сводка по распределению еды
-            std::cout << "\nFood distribution:\n";
+            // Статистика еды
             int total_food_eaten = 0;
             for (size_t i = 0; i < food_locations.size(); ++i)
             {
-                if (food_eaten_by[i] != -1)
-                {
-                    std::cout << "Food " << i << " at (" << food_locations[i].first
-                        << "," << food_locations[i].second << "): eaten by Agent "
-                        << food_eaten_by[i] << "\n";
-                    total_food_eaten++;
-                }
-                else
-                {
-                    std::cout << "Food " << i << " at (" << food_locations[i].first
-                        << "," << food_locations[i].second << "): not eaten\n";
-                }
+                if (food_eaten_by[i] != -1) total_food_eaten++;
             }
             std::cout << "Total food eaten: " << total_food_eaten << "/" << FOOD_COUNT << "\n";
 
-            // Статистика по каждому агенту
+            // Итоговая статистика
             for (size_t i = 0; i < paths.size(); i++)
             {
                 if (!paths[i].empty())
                 {
                     std::string agent_name;
                     if (current_mode == 3)
+                    {
+                        agent_name = (i == 0) ? "Panic Hero" : "Enemy";
+                    }
+                    else if (current_mode == 6)
                     {
                         agent_name = (i == 0) ? "Hero" : "Enemy";
                     }
@@ -394,8 +413,7 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                         << ", Points: " << agents_data[i].total_points
                         << ", Food: " << agents_data[i].food_eaten;
 
-                    // Вывод голода только для героя в режиме 3 и всех в других режимах
-                    if (current_mode != 3 || i == 0)
+                    if (current_mode != 3 && current_mode != 6 || i == 0)
                     {
                         std::cout << ", Final hunger: " << agents_data[i].current_hunger;
                     }
@@ -403,30 +421,50 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                 }
             }
 
-            // Особый вывод для режима "Герой vs Враг"
+            // Особые сообщения
             if (current_mode == 3)
             {
-                std::cout << "\n=== HERO VS ENEMY RESULTS ===\n";
+                std::cout << "\n=== PANIC MODE RESULTS ===\n";
                 if (collision_occurred)
                 {
-                    std::cout << "⚔️  ENEMY VICTORY! Hero was caught and defeated!\n";
+                    std::cout << "💀 Hero was caught (as expected with all that teleportation!)\n";
+                }
+                else if (agents_data[0].alive)
+                {
+                    std::cout << "🎉 Hero survived (despite the panic attacks!)\n";
                 }
                 else
                 {
-                    std::cout << "🎉 HERO VICTORY! Hero escaped from the enemy!\n";
+                    std::cout << "⚰️  Hero died from hunger (too busy panicking to eat)\n";
                 }
-                std::cout << "Enemy reached destination: "
-                    << (agents_data[1].finished ? "YES" : "NO") << "\n";
+                std::cout << "=========================\n";
+            }
+            else if (current_mode == 6)
+            {
+                std::cout << "\n=== STRATEGIC MODE RESULTS ===\n";
+                if (collision_occurred)
+                {
+                    std::cout << "⚔️  Enemy victory - better strategy needed!\n";
+                }
+                else if (agents_data[0].alive)
+                {
+                    std::cout << "🏆 Hero victory - excellent tactics!\n";
+                }
+                else
+                {
+                    std::cout << "💀 Hero perished - need more resources!\n";
+                }
+                std::cout << "============================\n";
             }
 
-            std::cout << "===========================\n\n";
+            std::cout << "\n";
         }
 
-        // Отрисовка текущего кадра
+        // Отрисовка
         window.clear(sf::Color::Black);
         visualize_maze(window, maze, font);
 
-        // Отрисовка путей всех агентов
+        // Отрисовка путей
         for (size_t i = 0; i < paths.size(); i++)
         {
             if (!paths[i].empty())
@@ -435,7 +473,7 @@ void run_multi_agent_animation(sf::RenderWindow& window,
             }
         }
 
-        // Отрисовка агентов на их текущих позициях
+        // Отрисовка агентов
         for (size_t i = 0; i < paths.size(); i++)
         {
             if (paths[i].empty() || !agents_data[i].alive) continue;
@@ -448,18 +486,15 @@ void run_multi_agent_animation(sf::RenderWindow& window,
                 size_t idx = static_cast<size_t>(progress);
                 float frac = progress - idx;
 
-                // Вычисление текущей позиции с интерполяцией
                 float pos_x = static_cast<float>(agent_path[idx].first * CELL_SIZE + CELL_SIZE / 2);
                 float pos_y = static_cast<float>(agent_path[idx].second * CELL_SIZE + CELL_SIZE / 2);
 
-                // Интерполяция к следующей точке пути
                 if (idx + 1 < agent_path.size())
                 {
                     pos_x += frac * (agent_path[idx + 1].first - agent_path[idx].first) * CELL_SIZE;
                     pos_y += frac * (agent_path[idx + 1].second - agent_path[idx].second) * CELL_SIZE;
                 }
 
-                // Создание и отрисовка агента
                 sf::CircleShape player(10);
                 player.setFillColor(agent_colors[i % agent_colors.size()]);
                 player.setOutlineColor(sf::Color::Black);
@@ -474,30 +509,38 @@ void run_multi_agent_animation(sf::RenderWindow& window,
 }
 
 /**
- * Вывод информации об управлении программой.
+ * Вывод информации об управлении.
  */
 void print_controls()
 {
     std::cout << "\n=== CONTROLS ===\n";
-    std::cout << "1-5: Select algorithm mode\n";
+    std::cout << "1-6: Select algorithm mode\n";
     std::cout << "  1: Single agent - Dijkstra with hunger\n";
     std::cout << "  2: Two agents - Mutual prediction\n";
-    std::cout << "  3: Hero vs Enemy - Deadly pursuit\n";
+    std::cout << "  3: Hero vs Enemy - PANIC MODE 😱 (LEGENDARY BUGS!)\n";
     std::cout << "  4: Neural Network - Train new\n";
     std::cout << "  5: Neural Network - Load trained\n";
+    std::cout << "  6: Hero vs Enemy - FIXED MODE 🧠 (No teleportation)\n";
     std::cout << "R: Regenerate maze\n";
     std::cout << "SPACE: Start animation\n";
+    std::cout << "P: Pause/resume animation\n";
     std::cout << "ESC: Stop animation\n";
     std::cout << "C: Show this help\n";
     std::cout << "Q: Quit program\n";
     std::cout << "================\n\n";
+
+    std::cout << "=== SPECIAL MODE 3 INFO ===\n";
+    std::cout << "🔥 PANIC MODE features:\n";
+    std::cout << "   • Hero with psychological issues\n";
+    std::cout << "   • Random teleportation episodes\n";
+    std::cout << "   • Panic attacks and paranoia\n";
+    std::cout << "   • Unpredictable behavior\n";
+    std::cout << "   • GUARANTEED ENTERTAINMENT!\n";
+    std::cout << "===========================\n\n";
 }
 
 /**
- * Основная функция программы.
- * Управляет генерацией лабиринта, выбором алгоритмов и визуализацией.
- *
- * Сложность: Зависит от выбранного пользователем режима и действий.
+ * Основная функция.
  */
 int main()
 {
@@ -506,25 +549,22 @@ int main()
 #endif
 
     std::cout << "========================================\n";
-    std::cout << "        MAZE PATHFINDING SIMULATION     \n";
+    std::cout << "     MAZE PATHFINDING SIMULATION 2.0    \n";
+    std::cout << "     Featuring: PANIC MODE 😱           \n";
     std::cout << "========================================\n\n";
 
     print_controls();
 
-    // Инициализация переменных состояния
-    int current_mode = 0;     // Текущий выбранный режим
-    bool path_found = false;  // Найден ли путь
+    int current_mode = 0;
+    bool path_found = false;
 
-    // Генерация начального лабиринта
     std::cout << "Generating maze...\n";
     generate_maze();
 
-    // Создание графического окна
     sf::RenderWindow window(sf::VideoMode(WIDTH * CELL_SIZE, HEIGHT * CELL_SIZE),
-        "Maze Pathfinding - Select Mode (1-5)");
+        "Maze Pathfinding - Select Mode (1-6)");
     window.setFramerateLimit(60);
 
-    // Загрузка шрифта для отображения стоимости клеток
     sf::Font font;
     if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf"))
     {
@@ -534,27 +574,26 @@ int main()
         }
     }
 
-    std::cout << "\nMaze generated. Select mode (1-5) to find path.\n";
+    std::cout << "\nMaze generated. Select mode (1-6) to find path.\n";
+    std::cout << "Mode 3 = PANIC MODE (recommended for fun!)\n";
+    std::cout << "Mode 6 = Fixed version (for serious players)\n";
     std::cout << "Press C for controls, R to regenerate maze.\n";
 
-    // Главный цикл обработки событий
     while (window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
         {
-            // Обработка закрытия окна
             if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
 
-            // Обработка нажатий клавиш
             if (event.type == sf::Event::KeyPressed)
             {
-                // Выбор режима работы (1-5)
+                // Выбор режима 1-6
                 if (event.key.code >= sf::Keyboard::Num1 &&
-                    event.key.code <= sf::Keyboard::Num5)
+                    event.key.code <= sf::Keyboard::Num6)
                 {
                     int new_mode = event.key.code - sf::Keyboard::Num1 + 1;
                     current_mode = new_mode;
@@ -562,14 +601,18 @@ int main()
                     std::cout << "\n=== MODE " << current_mode << " SELECTED ===\n";
                     path_found = find_path_with_mode(current_mode);
 
-                    // Обновление заголовка окна в зависимости от результата
                     if (path_found)
                     {
-                        if (current_mode == 2 || current_mode == 3)
+                        if (current_mode == 2 || current_mode == 3 || current_mode == 6)
                         {
+                            std::string mode_name = "";
+                            if (current_mode == 3) mode_name = "PANIC";
+                            else if (current_mode == 6) mode_name = "STRATEGIC";
+                            else mode_name = "Multi-Agent";
+
                             window.setTitle("Maze - Mode " + std::to_string(current_mode) +
-                                " - Multi-Agent - Press SPACE to animate");
-                            std::cout << "Multi-agent ready. Press SPACE to animate.\n";
+                                " (" + mode_name + ") - Press SPACE");
+                            std::cout << mode_name << " ready. Press SPACE to animate.\n";
                         }
                         else
                         {
@@ -595,8 +638,8 @@ int main()
                     multi_agent_paths.clear();
                     path_found = false;
                     current_mode = 0;
-                    window.setTitle("Maze Pathfinding - Select Mode (1-5)");
-                    std::cout << "Maze regenerated. Select mode (1-5) to find path.\n";
+                    window.setTitle("Maze Pathfinding - Select Mode (1-6)");
+                    std::cout << "Maze regenerated. Select mode (1-6) to find path.\n";
                 }
 
                 // Запуск анимации
@@ -604,14 +647,18 @@ int main()
                 {
                     if (!path_found)
                     {
-                        std::cout << "\nERROR: No path to animate. Select mode (1-5) and find path first.\n";
+                        std::cout << "\nERROR: No path to animate. Select mode first.\n";
                     }
-                    else if (current_mode == 2 || current_mode == 3)
+                    else if (current_mode == 2 || current_mode == 3 || current_mode == 6)
                     {
-                        // Запуск мульти-агентной анимации
                         if (!multi_agent_paths.empty() && !multi_agent_paths[0].empty())
                         {
-                            std::cout << "\nStarting multi-agent animation...\n";
+                            std::cout << "\nStarting animation...\n";
+                            if (current_mode == 3)
+                            {
+                                std::cout << "⚠️ MEDICAL WARNING: Patient #001 is unstable!\n";
+                                std::cout << "   Keep all sharp objects away from screen.\n\n";
+                            }
                             run_multi_agent_animation(window, maze, multi_agent_paths, font, current_mode);
                             std::cout << "Animation finished. Ready for commands.\n";
                         }
@@ -622,7 +669,6 @@ int main()
                     }
                     else
                     {
-                        // Запуск одно-агентной анимации
                         if (!path.empty())
                         {
                             std::cout << "\nStarting single-agent animation...\n";
@@ -636,28 +682,16 @@ int main()
                     }
                 }
 
-                // Вывод справки по управлению
+                // Справка
                 if (event.key.code == sf::Keyboard::C)
                 {
                     print_controls();
                     std::cout << "Current mode: "
                         << (current_mode > 0 ? std::to_string(current_mode) : "not selected") << "\n";
                     std::cout << "Path found: " << (path_found ? "yes" : "no") << "\n";
-
-                    // Дополнительная информация для мульти-агентных режимов
-                    if ((current_mode == 2 || current_mode == 3) && path_found)
-                    {
-                        for (size_t i = 0; i < multi_agent_paths.size(); i++)
-                        {
-                            std::cout << "Agent " << i << " path length: "
-                                << (multi_agent_paths[i].empty() ? 0 : multi_agent_paths[i].size() - 1)
-                                << ", starts at: (" << multi_agent_paths[i][0].first
-                                << ", " << multi_agent_paths[i][0].second << ")\n";
-                        }
-                    }
                 }
 
-                // Выход из программы
+                // Выход
                 if (event.key.code == sf::Keyboard::Q)
                 {
                     std::cout << "\nExiting program...\n";
@@ -666,16 +700,15 @@ int main()
             }
         }
 
-        // Отрисовка текущего состояния
+        // Отрисовка
         window.clear(sf::Color::Black);
         visualize_maze(window, maze, font);
 
-        // Отрисовка пути в зависимости от режима
         if (path_found)
         {
-            if ((current_mode == 2 || current_mode == 3) && !multi_agent_paths.empty())
+            if ((current_mode == 2 || current_mode == 3 || current_mode == 6) &&
+                !multi_agent_paths.empty())
             {
-                // Отрисовка путей всех агентов
                 for (size_t i = 0; i < multi_agent_paths.size(); i++)
                 {
                     if (!multi_agent_paths[i].empty())
@@ -686,7 +719,6 @@ int main()
             }
             else if (!path.empty())
             {
-                // Отрисовка пути одного агента
                 visualize_path(window, 0, path);
             }
         }
@@ -696,6 +728,7 @@ int main()
 
     std::cout << "\n========================================\n";
     std::cout << "        PROGRAM TERMINATED              \n";
+    std::cout << "  Thank you for testing PANIC MODE!     \n";
     std::cout << "========================================\n";
 
     return 0;
